@@ -2,7 +2,7 @@ mod action;
 mod fighter;
 mod specials;
 
-use crate::{action::Move, fighter::Fighter};
+use crate::fighter::Fighter;
 use std::io::{self, Write};
 
 fn main() -> anyhow::Result<()> {
@@ -27,7 +27,7 @@ fn main() -> anyhow::Result<()> {
         println!("Us: {us:?}");
         println!("Them: {them:?}");
 
-        let their_move = Move::from(fastrand::u8(0..10));
+        let their_move = them.random_move();
         println!(
             "Their move: {:?} ({:?})",
             their_move,

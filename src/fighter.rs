@@ -40,6 +40,15 @@ impl Fighter {
         }
     }
 
+    pub fn random_move(&self) -> Move {
+        loop {
+            let mv = Move::from(fastrand::u8(0..10));
+            if self.check_energy_cost(&mv).is_some() {
+                return mv;
+            }
+        }
+    }
+
     pub fn execute(&mut self, other: &mut Self, mv: &Move, their_mv: &Move) {
         // Apply the cost of the move first
         if !self.drain_energy(mv) {
