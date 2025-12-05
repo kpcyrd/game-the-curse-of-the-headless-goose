@@ -4,12 +4,12 @@ use crate::{
 };
 
 pub fn turn(us: &mut Fighter, them: &mut Fighter, our_move: &Move, their_move: &Move) {
-    them.execute(us, &their_move, &our_move);
+    them.execute(us, their_move, our_move);
     if us.defeated() {
         // If we were defeated, end the round early
         return;
     }
-    us.execute(them, &our_move, &their_move);
+    us.execute(them, our_move, their_move);
 }
 
 pub struct Stats {

@@ -1,0 +1,11 @@
+[jobs.check]
+command = ["cargo", "check"]
+need_stdout = false
+
+[jobs.test]
+command = ["cargo", "test", "--workspace", "--lib", "--target", "aarch64-apple-darwin"]
+need_stdout = true
+
+[jobs.clippy-all]
+command = ["cargo", "clippy", "--workspace", "--all-targets", "--target", "aarch64-apple-darwin"]
+need_stdout = false
