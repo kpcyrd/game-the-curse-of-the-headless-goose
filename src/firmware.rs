@@ -1,4 +1,5 @@
 // use eh0::timer::CountDown;
+use crate::random::Random;
 use embedded_graphics::{
     draw_target::DrawTarget,
     pixelcolor::{Rgb666, RgbColor},
@@ -37,7 +38,7 @@ fn main() -> ! {
     let mut timer = Timer::new(pac.TIMER, &mut pac.RESETS, &clocks);
 
     let rosc = RingOscillator::new(pac.ROSC).initialize();
-    // let mut rng = Random::new(rosc);
+    let mut rng = Random::new(rosc);
 
     // Configure gpio
     let sio = Sio::new(pac.SIO);

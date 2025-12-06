@@ -1,5 +1,5 @@
-use log::info;
 use crate::{fighter::Fighter, specials::SpecialAbility};
+use log::info;
 
 pub struct Heal;
 

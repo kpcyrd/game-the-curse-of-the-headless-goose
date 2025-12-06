@@ -5,6 +5,7 @@ pub mod action;
 pub mod cli;
 pub mod cooldown;
 pub mod fighter;
-pub mod specials;
 #[cfg(target_os = "none")]
 pub mod firmware;
+pub mod random;
+pub mod specials;

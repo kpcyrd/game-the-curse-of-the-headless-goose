@@ -1,6 +1,7 @@
 use crate::{
     action,
     fighter::{self, Fighter},
+    random::FastRandom,
 };
 use env_logger::Env;
 use std::io::{self, Write};
@@ -9,6 +10,7 @@ pub fn main() -> anyhow::Result<()> {
     env_logger::init_from_env(Env::default().default_filter_or("debug"));
 
     let mut stdout = io::stdout();
+    let mut rng = FastRandom::new();
 
     let stdin = io::stdin();
     let mut lines = stdin.lines();
@@ -31,7 +33,7 @@ pub fn main() -> anyhow::Result<()> {
         println!("Us: {us:?}");
         println!("Them: {them:?}");
 
-        let their_move = them.random_move();
+        let their_move = them.random_move(&mut rng);
         println!(
             "Their move: {:?} ({:?})",
             their_move,
@@ -52,7 +54,7 @@ pub fn main() -> anyhow::Result<()> {
 
         println!("Our move: {:?} ({:?})", our_move, our_move.to_decision());
 
-        fighter::turn(&mut us, &mut them, &our_move, &their_move);
+        fighter::turn(&mut rng, &mut us, &mut them, &our_move, &their_move);
 
         if us.defeated() {
             println!("We have been defeated! Game over.");

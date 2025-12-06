@@ -1,4 +1,4 @@
-use crate::action::Move;
+use crate::{action::Move, random::Rng};
 
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct Cooldown {
@@ -22,6 +22,19 @@ impl Cooldown {
 
     pub fn consume(&mut self) {
         self.value = 0;
+    }
+
+    pub fn attempt<R: Rng>(&mut self, rng: &mut R) -> bool {
+        if self.value == self.total {
+            true
+        } else {
+            let chance = u8::MAX
+                .saturating_div(self.total)
+                .saturating_mul(self.value);
+            self.consume();
+            let roll = rng.get();
+            roll >= chance
+        }
     }
 }
 

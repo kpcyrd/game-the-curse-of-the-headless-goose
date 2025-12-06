@@ -1,17 +1,24 @@
-use log::info;
 use crate::{
     action::{Decision, Move},
     cooldown::CooldownSet,
+    random::Rng,
     specials::{self, Special},
 };
+use log::{debug, info};
 
-pub fn turn(us: &mut Fighter, them: &mut Fighter, our_move: &Move, their_move: &Move) {
-    them.execute(us, their_move, our_move);
+pub fn turn<R: Rng>(
+    rng: &mut R,
+    us: &mut Fighter,
+    them: &mut Fighter,
+    our_move: &Move,
+    their_move: &Move,
+) {
+    them.execute(rng, us, their_move, our_move);
     if us.defeated() {
         // If we were defeated, end the round early
         return;
     }
-    us.execute(them, our_move, their_move);
+    us.execute(rng, them, our_move, their_move);
 }
 
 pub struct Stats {
@@ -45,23 +52,27 @@ impl Fighter {
         }
     }
 
-    pub fn random_move(&self) -> Move {
+    pub fn random_move<R: Rng>(&self, rng: &mut R) -> Move {
         loop {
-            let mv = Move::from(fastrand::u8(0..10));
+            let roll = rng.get_range(0..10);
+            let mv = Move::from(roll);
             if self.check_energy_cost(&mv).is_some() {
                 return mv;
             }
         }
     }
 
-    pub fn execute(&mut self, other: &mut Self, mv: &Move, their_mv: &Move) {
+    pub fn execute<R: Rng>(&mut self, rng: &mut R, other: &mut Self, mv: &Move, their_mv: &Move) {
         // Apply the cost of the move first
         if !self.drain_energy(mv) {
             return;
         }
 
-        // TODO: also check cooldown and chance
-        self.cooldown.get(mv).consume();
+        // Check cooldown of action
+        if self.cooldown.get(mv).attempt(rng) {
+            debug!("Move is on cooldown, cannot execute!");
+            return;
+        }
 
         // Check if it goes through
         if other.check_energy_cost(their_mv).is_some() && their_mv.blocks(mv) {
