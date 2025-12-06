@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 #[derive(Debug, PartialEq)]
 pub enum Decision {
     Block,
@@ -81,7 +79,8 @@ impl From<u8> for Move {
     }
 }
 
-impl FromStr for Move {
+#[cfg(not(target_os = "none"))]
+impl std::str::FromStr for Move {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {

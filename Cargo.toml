@@ -4,5 +4,15 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+cortex-m-rt = "0.7.3"
+defmt-rtt = "0.4"
+embedded-graphics = "0.8.1"
+embedded-hal = "1.0.0"
+panic-halt = "1"
+
+[target.'cfg(target_os="none")'.dependencies]
+waveshare-rp2040-zero = "0.8"
+
+[target.'cfg(not(target_os="none"))'.dependencies]
 anyhow = "1.0.100"
 fastrand = "2.3.0"
