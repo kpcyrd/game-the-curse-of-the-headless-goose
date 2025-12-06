@@ -1,6 +1,8 @@
+use core::fmt;
+
 use crate::{action::Move, random::Rng};
 
-#[derive(Debug, Clone, Copy, PartialEq, Default)]
+#[derive(Clone, Copy, PartialEq, Default)]
 pub struct Cooldown {
     pub value: u8,
     pub total: u8,
@@ -35,6 +37,12 @@ impl Cooldown {
             let roll = rng.get();
             roll >= chance
         }
+    }
+}
+
+impl fmt::Debug for Cooldown {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Cooldown {{ {}/{} }}", self.value, self.total)
     }
 }
 
