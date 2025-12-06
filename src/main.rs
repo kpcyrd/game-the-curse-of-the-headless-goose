@@ -1,4 +1,5 @@
 mod action;
+mod cooldown;
 mod fighter;
 mod specials;
 
@@ -15,12 +16,14 @@ fn main() -> anyhow::Result<()> {
         health: 30,
         energy: 10,
         recharge: 1,
+        cooldown: 2,
     });
 
     let mut them = Fighter::new(fighter::Stats {
         health: 30,
         energy: 10,
         recharge: 1,
+        cooldown: 2,
     });
 
     loop {
