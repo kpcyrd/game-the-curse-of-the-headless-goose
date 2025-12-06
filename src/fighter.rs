@@ -1,3 +1,4 @@
+use log::info;
 use crate::{
     action::{Decision, Move},
     cooldown::CooldownSet,
@@ -68,7 +69,7 @@ impl Fighter {
         }
 
         if mv.damage() > 0 {
-            println!("Applying damage!");
+            info!("Applying damage!");
             other.apply_damage(mv);
         }
 

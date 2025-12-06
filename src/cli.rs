@@ -1,7 +1,13 @@
-use crate::{action, fighter::{self, Fighter}};
+use crate::{
+    action,
+    fighter::{self, Fighter},
+};
+use env_logger::Env;
 use std::io::{self, Write};
 
 pub fn main() -> anyhow::Result<()> {
+    env_logger::init_from_env(Env::default().default_filter_or("debug"));
+
     let mut stdout = io::stdout();
 
     let stdin = io::stdin();
