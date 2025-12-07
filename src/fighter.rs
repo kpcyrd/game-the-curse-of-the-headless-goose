@@ -15,19 +15,9 @@ pub fn turn<R: Rng>(
 ) {
     // Apply cooldown checks and rolls
     info!("Their turn (early)");
-    if their_move
-        .take_if(|mv| !them.cooldown.attempt(rng, mv))
-        .is_some()
-    {
-        debug!("Move is on cooldown, cannot execute!");
-    }
+    them.roll_cooldown_check(rng, &mut their_move);
     info!("Our turn (early)");
-    if our_move
-        .take_if(|mv| !us.cooldown.attempt(rng, mv))
-        .is_some()
-    {
-        debug!("Move is on cooldown, cannot execute!");
-    }
+    us.roll_cooldown_check(rng, &mut our_move);
 
     // Apply moves
     info!("Their turn");
@@ -90,6 +80,12 @@ impl Fighter {
                     return mv;
                 }
             }
+        }
+    }
+
+    pub fn roll_cooldown_check<R: Rng>(&mut self, rng: &mut R, mv: &mut Option<&Move>) {
+        if mv.take_if(|mv| !self.cooldown.attempt(rng, mv)).is_some() {
+            debug!("Move is on cooldown, cannot execute!");
         }
     }
 
