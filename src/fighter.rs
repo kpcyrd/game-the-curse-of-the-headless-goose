@@ -57,7 +57,7 @@ impl Fighter {
         loop {
             let roll = rng.get_range(0..10);
             let mv = Move::from(roll);
-            if self.check_energy_cost(&mv).is_some() {
+            if self.cooldown.get(&mv).is_some() && self.check_energy_cost(&mv).is_some() {
                 return mv;
             }
         }
@@ -155,11 +155,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: {
-                    let mut cool = CooldownSet::new(1, 10);
-                    cool.get(&Move::Three).unwrap().consume();
-                    cool
-                }
+                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Three),
             }
         );
         assert_eq!(
@@ -171,11 +167,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: {
-                    let mut cool = CooldownSet::new(1, 10);
-                    cool.get(&Move::Two).unwrap().consume();
-                    cool
-                }
+                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Two),
             }
         );
     }
@@ -196,11 +188,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: {
-                    let mut cool = CooldownSet::new(1, 10);
-                    cool.get(&Move::Three).unwrap().consume();
-                    cool
-                }
+                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Three),
             }
         );
         assert_eq!(
@@ -212,11 +200,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: {
-                    let mut cool = CooldownSet::new(1, 10);
-                    cool.get(&Move::Six).unwrap().consume();
-                    cool
-                }
+                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Six),
             }
         );
     }
@@ -243,11 +227,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: {
-                    let mut cool = CooldownSet::new(1, 10);
-                    cool.get(&Move::Three).unwrap().consume();
-                    cool
-                }
+                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Three),
             }
         );
         assert_eq!(
@@ -259,11 +239,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: {
-                    let mut cool = CooldownSet::new(1, 10);
-                    cool.get(&Move::Nine).unwrap().consume();
-                    cool
-                }
+                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Nine),
             }
         );
     }
@@ -284,11 +260,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: {
-                    let mut cool = CooldownSet::new(1, 10);
-                    cool.get(&Move::Nine).unwrap().consume();
-                    cool
-                }
+                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Nine),
             }
         );
         assert_eq!(
@@ -300,11 +272,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: {
-                    let mut cool = CooldownSet::new(1, 10);
-                    cool.get(&Move::Four).unwrap().consume();
-                    cool
-                }
+                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Four),
             }
         );
     }
@@ -325,11 +293,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: {
-                    let mut cool = CooldownSet::new(1, 10);
-                    cool.get(&Move::Nine).unwrap().consume();
-                    cool
-                }
+                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Nine),
             }
         );
         assert_eq!(
@@ -341,11 +305,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: {
-                    let mut cool = CooldownSet::new(1, 10);
-                    cool.get(&Move::Six).unwrap().consume();
-                    cool
-                }
+                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Six),
             }
         );
     }
@@ -372,11 +332,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: {
-                    let mut cool = CooldownSet::new(1, 10);
-                    cool.get(&Move::Nine).unwrap().consume();
-                    cool
-                }
+                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Nine),
             }
         );
         assert_eq!(
@@ -388,11 +344,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: {
-                    let mut cool = CooldownSet::new(1, 10);
-                    cool.get(&Move::Three).unwrap().consume();
-                    cool
-                }
+                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Three),
             }
         );
     }
@@ -414,11 +366,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: {
-                    let mut cool = CooldownSet::new(1, 10);
-                    cool.get(&Move::One).unwrap().consume();
-                    cool
-                }
+                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::One),
             }
         );
         assert_eq!(
@@ -430,11 +378,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: {
-                    let mut cool = CooldownSet::new(1, 10);
-                    cool.get(&Move::Six).unwrap().consume();
-                    cool
-                }
+                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Six),
             }
         );
     }
@@ -456,11 +400,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: {
-                    let mut cool = CooldownSet::new(1, 10);
-                    cool.get(&Move::One).unwrap().consume();
-                    cool
-                }
+                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::One),
             }
         );
         assert_eq!(
@@ -472,11 +412,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: {
-                    let mut cool = CooldownSet::new(1, 10);
-                    cool.get(&Move::Three).unwrap().consume();
-                    cool
-                }
+                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Three),
             }
         );
     }

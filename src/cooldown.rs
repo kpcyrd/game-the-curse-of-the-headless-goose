@@ -16,13 +16,13 @@ impl Cooldown {
         }
     }
 
-    pub fn increase(&mut self) {
+    pub const fn increase(&mut self) {
         if self.value < self.total {
             self.value += 1;
         }
     }
 
-    pub fn consume(&mut self) {
+    pub const fn consume(&mut self) {
         self.value = 0;
     }
 
@@ -83,7 +83,30 @@ impl CooldownSet {
         CooldownSet { values }
     }
 
-    pub fn get(&mut self, mv: &Move) -> Option<&mut Cooldown> {
+    pub const fn and_consumed(mut self, mv: &Move) -> Self {
+        if let Some(cd) = self.get_mut(mv) {
+            cd.consume();
+        }
+        self
+    }
+
+    pub const fn get(&self, mv: &Move) -> Option<&Cooldown> {
+        let slot = match mv {
+            Move::Zero => &self.values[0],
+            Move::One => &self.values[1],
+            Move::Two => &self.values[2],
+            Move::Three => &self.values[3],
+            Move::Four => &self.values[4],
+            Move::Five => &self.values[5],
+            Move::Six => &self.values[6],
+            Move::Seven => &self.values[7],
+            Move::Eight => &self.values[8],
+            Move::Nine => &self.values[9],
+        };
+        slot.as_ref()
+    }
+
+    pub const fn get_mut(&mut self, mv: &Move) -> Option<&mut Cooldown> {
         let slot = match mv {
             Move::Zero => &mut self.values[0],
             Move::One => &mut self.values[1],
@@ -100,7 +123,7 @@ impl CooldownSet {
     }
 
     pub fn attempt<R: Rng>(&mut self, rng: &mut R, mv: &Move) -> bool {
-        self.get(mv).is_some_and(|cool| cool.attempt(rng))
+        self.get_mut(mv).is_some_and(|cool| cool.attempt(rng))
     }
 
     pub fn increase(&mut self) {
