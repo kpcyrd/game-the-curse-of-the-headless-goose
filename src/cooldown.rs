@@ -47,20 +47,44 @@ impl fmt::Debug for Cooldown {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct CooldownSet {
-    values: [Cooldown; 10],
+    values: [Option<Cooldown>; 10],
+}
+
+impl fmt::Debug for CooldownSet {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "CooldownSet [ ")?;
+        for (i, cd) in self.values.iter().enumerate() {
+            if i > 0 {
+                write!(f, ", ")?;
+            }
+            if let Some(cd) = cd {
+                write!(f, "{cd:?}")?;
+            } else {
+                write!(f, "-")?;
+            }
+        }
+        write!(f, " ]")
+    }
 }
 
 impl CooldownSet {
-    pub const fn new(duration: u8) -> Self {
-        CooldownSet {
-            values: [Cooldown::new(duration); _],
+    pub const fn new(duration: u8, unlocked: usize) -> Self {
+        let mut values = [None; _];
+
+        // TODO: current rust can't do for loops in const fn yet
+        let mut idx = 0;
+        while unlocked > idx && idx < values.len() {
+            values[idx] = Some(Cooldown::new(duration));
+            idx += 1;
         }
+
+        CooldownSet { values }
     }
 
-    pub fn get(&mut self, mv: &Move) -> &mut Cooldown {
-        match mv {
+    pub fn get(&mut self, mv: &Move) -> Option<&mut Cooldown> {
+        let slot = match mv {
             Move::Zero => &mut self.values[0],
             Move::One => &mut self.values[1],
             Move::Two => &mut self.values[2],
@@ -71,11 +95,16 @@ impl CooldownSet {
             Move::Seven => &mut self.values[7],
             Move::Eight => &mut self.values[8],
             Move::Nine => &mut self.values[9],
-        }
+        };
+        slot.as_mut()
+    }
+
+    pub fn attempt<R: Rng>(&mut self, rng: &mut R, mv: &Move) -> bool {
+        self.get(mv).is_some_and(|cool| cool.attempt(rng))
     }
 
     pub fn increase(&mut self) {
-        for cooldown in &mut self.values {
+        for cooldown in self.values.iter_mut().flatten() {
             cooldown.increase();
         }
     }

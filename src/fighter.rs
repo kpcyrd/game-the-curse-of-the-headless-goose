@@ -26,6 +26,7 @@ pub struct Stats {
     pub energy: u16,
     pub recharge: u16,
     pub cooldown: u8,
+    pub abilities: u8,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -48,7 +49,7 @@ impl Fighter {
             max_energy: stats.energy,
             recharge: stats.recharge,
             special: specials::Special::Heal,
-            cooldown: CooldownSet::new(stats.cooldown),
+            cooldown: CooldownSet::new(stats.cooldown, stats.abilities as usize),
         }
     }
 
@@ -69,7 +70,7 @@ impl Fighter {
         }
 
         // Check cooldown of action
-        if !self.cooldown.get(mv).attempt(rng) {
+        if !self.cooldown.attempt(rng, mv) {
             debug!("Move is on cooldown, cannot execute!");
             return;
         }
@@ -135,6 +136,7 @@ mod tests {
         energy: 10,
         recharge: 1,
         cooldown: 1,
+        abilities: 10,
     });
 
     #[test]
@@ -154,8 +156,8 @@ mod tests {
                 recharge: 1,
                 special: Special::Heal,
                 cooldown: {
-                    let mut cool = CooldownSet::new(1);
-                    cool.get(&Move::Three).consume();
+                    let mut cool = CooldownSet::new(1, 10);
+                    cool.get(&Move::Three).unwrap().consume();
                     cool
                 }
             }
@@ -170,8 +172,8 @@ mod tests {
                 recharge: 1,
                 special: Special::Heal,
                 cooldown: {
-                    let mut cool = CooldownSet::new(1);
-                    cool.get(&Move::Two).consume();
+                    let mut cool = CooldownSet::new(1, 10);
+                    cool.get(&Move::Two).unwrap().consume();
                     cool
                 }
             }
@@ -195,8 +197,8 @@ mod tests {
                 recharge: 1,
                 special: Special::Heal,
                 cooldown: {
-                    let mut cool = CooldownSet::new(1);
-                    cool.get(&Move::Three).consume();
+                    let mut cool = CooldownSet::new(1, 10);
+                    cool.get(&Move::Three).unwrap().consume();
                     cool
                 }
             }
@@ -211,8 +213,8 @@ mod tests {
                 recharge: 1,
                 special: Special::Heal,
                 cooldown: {
-                    let mut cool = CooldownSet::new(1);
-                    cool.get(&Move::Six).consume();
+                    let mut cool = CooldownSet::new(1, 10);
+                    cool.get(&Move::Six).unwrap().consume();
                     cool
                 }
             }
@@ -242,8 +244,8 @@ mod tests {
                 recharge: 1,
                 special: Special::Heal,
                 cooldown: {
-                    let mut cool = CooldownSet::new(1);
-                    cool.get(&Move::Three).consume();
+                    let mut cool = CooldownSet::new(1, 10);
+                    cool.get(&Move::Three).unwrap().consume();
                     cool
                 }
             }
@@ -258,8 +260,8 @@ mod tests {
                 recharge: 1,
                 special: Special::Heal,
                 cooldown: {
-                    let mut cool = CooldownSet::new(1);
-                    cool.get(&Move::Nine).consume();
+                    let mut cool = CooldownSet::new(1, 10);
+                    cool.get(&Move::Nine).unwrap().consume();
                     cool
                 }
             }
@@ -283,8 +285,8 @@ mod tests {
                 recharge: 1,
                 special: Special::Heal,
                 cooldown: {
-                    let mut cool = CooldownSet::new(1);
-                    cool.get(&Move::Nine).consume();
+                    let mut cool = CooldownSet::new(1, 10);
+                    cool.get(&Move::Nine).unwrap().consume();
                     cool
                 }
             }
@@ -299,8 +301,8 @@ mod tests {
                 recharge: 1,
                 special: Special::Heal,
                 cooldown: {
-                    let mut cool = CooldownSet::new(1);
-                    cool.get(&Move::Four).consume();
+                    let mut cool = CooldownSet::new(1, 10);
+                    cool.get(&Move::Four).unwrap().consume();
                     cool
                 }
             }
@@ -324,8 +326,8 @@ mod tests {
                 recharge: 1,
                 special: Special::Heal,
                 cooldown: {
-                    let mut cool = CooldownSet::new(1);
-                    cool.get(&Move::Nine).consume();
+                    let mut cool = CooldownSet::new(1, 10);
+                    cool.get(&Move::Nine).unwrap().consume();
                     cool
                 }
             }
@@ -340,8 +342,8 @@ mod tests {
                 recharge: 1,
                 special: Special::Heal,
                 cooldown: {
-                    let mut cool = CooldownSet::new(1);
-                    cool.get(&Move::Six).consume();
+                    let mut cool = CooldownSet::new(1, 10);
+                    cool.get(&Move::Six).unwrap().consume();
                     cool
                 }
             }
@@ -371,8 +373,8 @@ mod tests {
                 recharge: 1,
                 special: Special::Heal,
                 cooldown: {
-                    let mut cool = CooldownSet::new(1);
-                    cool.get(&Move::Nine).consume();
+                    let mut cool = CooldownSet::new(1, 10);
+                    cool.get(&Move::Nine).unwrap().consume();
                     cool
                 }
             }
@@ -387,8 +389,8 @@ mod tests {
                 recharge: 1,
                 special: Special::Heal,
                 cooldown: {
-                    let mut cool = CooldownSet::new(1);
-                    cool.get(&Move::Three).consume();
+                    let mut cool = CooldownSet::new(1, 10);
+                    cool.get(&Move::Three).unwrap().consume();
                     cool
                 }
             }
@@ -413,8 +415,8 @@ mod tests {
                 recharge: 1,
                 special: Special::Heal,
                 cooldown: {
-                    let mut cool = CooldownSet::new(1);
-                    cool.get(&Move::One).consume();
+                    let mut cool = CooldownSet::new(1, 10);
+                    cool.get(&Move::One).unwrap().consume();
                     cool
                 }
             }
@@ -429,8 +431,8 @@ mod tests {
                 recharge: 1,
                 special: Special::Heal,
                 cooldown: {
-                    let mut cool = CooldownSet::new(1);
-                    cool.get(&Move::Six).consume();
+                    let mut cool = CooldownSet::new(1, 10);
+                    cool.get(&Move::Six).unwrap().consume();
                     cool
                 }
             }
@@ -455,8 +457,8 @@ mod tests {
                 recharge: 1,
                 special: Special::Heal,
                 cooldown: {
-                    let mut cool = CooldownSet::new(1);
-                    cool.get(&Move::One).consume();
+                    let mut cool = CooldownSet::new(1, 10);
+                    cool.get(&Move::One).unwrap().consume();
                     cool
                 }
             }
@@ -471,8 +473,8 @@ mod tests {
                 recharge: 1,
                 special: Special::Heal,
                 cooldown: {
-                    let mut cool = CooldownSet::new(1);
-                    cool.get(&Move::Three).consume();
+                    let mut cool = CooldownSet::new(1, 10);
+                    cool.get(&Move::Three).unwrap().consume();
                     cool
                 }
             }

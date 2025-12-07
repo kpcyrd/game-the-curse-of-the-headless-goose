@@ -20,6 +20,7 @@ pub fn main() -> anyhow::Result<()> {
         energy: 10,
         recharge: 1,
         cooldown: 2,
+        abilities: 5,
     });
 
     let mut them = Fighter::new(fighter::Stats {
@@ -27,6 +28,7 @@ pub fn main() -> anyhow::Result<()> {
         energy: 10,
         recharge: 1,
         cooldown: 2,
+        abilities: 10,
     });
 
     loop {
