@@ -16,10 +16,10 @@ pub fn main() -> anyhow::Result<()> {
     let mut lines = stdin.lines();
 
     let mut us = Fighter::new(fighter::Stats {
-        health: 30,
+        health: 10,
         energy: 10,
         recharge: 1,
-        cooldown: 3,
+        cooldown: 4,
         abilities: 5,
     });
 
