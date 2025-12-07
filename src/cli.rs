@@ -19,7 +19,7 @@ pub fn main() -> anyhow::Result<()> {
         health: 30,
         energy: 10,
         recharge: 1,
-        cooldown: 2,
+        cooldown: 3,
         abilities: 5,
     });
 

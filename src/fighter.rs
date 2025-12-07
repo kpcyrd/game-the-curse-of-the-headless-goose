@@ -13,11 +13,13 @@ pub fn turn<R: Rng>(
     our_move: &Move,
     their_move: &Move,
 ) {
+    info!("Their turn");
     them.execute(rng, us, their_move, our_move);
     if us.defeated() {
         // If we were defeated, end the round early
         return;
     }
+    info!("Our turn");
     us.execute(rng, them, our_move, their_move);
 }
 
@@ -54,19 +56,29 @@ impl Fighter {
     }
 
     pub fn random_move<R: Rng>(&self, rng: &mut R) -> Move {
+        let mut cooldown_reroll = true;
         loop {
             let roll = rng.get_range(0..10);
             let mv = Move::from(roll);
-            // TODO: balance the odds of selecting moves on cooldown
-            if self.cooldown.get(&mv).is_some() && self.check_energy_cost(&mv).is_some() {
-                return mv;
+
+            if let Some(cooldown) = self.cooldown.get(&mv) {
+                // balance the odds of selecting moves on cooldown
+                if !cooldown.full() && cooldown_reroll {
+                    cooldown_reroll = false;
+                    continue;
+                }
+
+                // if we can afford the move, select it
+                if self.check_energy_cost(&mv).is_some() {
+                    return mv;
+                }
             }
         }
     }
 
     pub fn execute<R: Rng>(&mut self, rng: &mut R, other: &mut Self, mv: &Move, their_mv: &Move) {
-        // Apply the cost of the move first
-        if !self.drain_energy(mv) {
+        // Before executing, check energy cost
+        if self.check_energy_cost(mv).is_none() {
             return;
         }
 
@@ -76,8 +88,14 @@ impl Fighter {
             return;
         }
 
+        // Apply the cost of the move first
+        if !self.drain_energy(mv) {
+            return;
+        }
+
         // Check if it goes through
         if other.check_energy_cost(their_mv).is_some() && their_mv.blocks(mv) {
+            info!("Blocked!");
             return;
         }
 

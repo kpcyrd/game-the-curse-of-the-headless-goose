@@ -22,12 +22,16 @@ impl Cooldown {
         }
     }
 
+    pub const fn full(&self) -> bool {
+        self.value == self.total
+    }
+
     pub const fn consume(&mut self) {
         self.value = 0;
     }
 
     pub fn attempt<R: Rng>(&mut self, rng: &mut R) -> bool {
-        if self.value != self.total {
+        if !self.full() {
             let chance = u8::MAX
                 .saturating_div(self.total)
                 .saturating_mul(self.value);
