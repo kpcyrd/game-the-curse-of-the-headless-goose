@@ -1,3 +1,5 @@
+use crate::input;
+
 #[derive(Debug, PartialEq)]
 pub enum Decision {
     Block,
@@ -59,6 +61,22 @@ impl Move {
 
     pub const fn blocks(&self, other: &Move) -> bool {
         self.to_decision().blocks(&other.to_decision())
+    }
+
+    pub const fn from_input(event: input::Event) -> Option<Self> {
+        match event {
+            input::Event::Zero => Some(Move::Zero),
+            input::Event::One => Some(Move::One),
+            input::Event::Two => Some(Move::Two),
+            input::Event::Three => Some(Move::Three),
+            input::Event::Four => Some(Move::Four),
+            input::Event::Five => Some(Move::Five),
+            input::Event::Six => Some(Move::Six),
+            input::Event::Seven => Some(Move::Seven),
+            input::Event::Eight => Some(Move::Eight),
+            input::Event::Nine => Some(Move::Nine),
+            _ => None,
+        }
     }
 }
 
