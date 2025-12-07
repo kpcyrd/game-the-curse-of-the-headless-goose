@@ -37,6 +37,9 @@ impl Scene {
             } => {
                 let mv = Move::from_input(event)?;
 
+                // Ensure the move is unlocked
+                player.cooldown.get(&mv)?;
+
                 fighter::turn(rng, player, enemy, &mv, their_move);
                 *their_move = enemy.random_move(rng);
 

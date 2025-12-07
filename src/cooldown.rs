@@ -27,17 +27,18 @@ impl Cooldown {
     }
 
     pub fn attempt<R: Rng>(&mut self, rng: &mut R) -> bool {
-        if self.value == self.total {
-            self.consume();
-            true
-        } else {
+        if self.value != self.total {
             let chance = u8::MAX
                 .saturating_div(self.total)
                 .saturating_mul(self.value);
-            self.consume();
             let roll = rng.get();
-            roll >= chance
-        }
+            if roll < chance {
+                return false;
+            }
+        };
+
+        self.consume();
+        true
     }
 }
 

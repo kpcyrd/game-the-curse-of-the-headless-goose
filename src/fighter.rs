@@ -57,6 +57,7 @@ impl Fighter {
         loop {
             let roll = rng.get_range(0..10);
             let mv = Move::from(roll);
+            // TODO: balance the odds of selecting moves on cooldown
             if self.cooldown.get(&mv).is_some() && self.check_energy_cost(&mv).is_some() {
                 return mv;
             }
