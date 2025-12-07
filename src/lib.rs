@@ -7,7 +7,7 @@ pub mod cooldown;
 pub mod fighter;
 #[cfg(target_os = "none")]
 pub mod firmware;
-pub mod machine;
 pub mod input;
+pub mod machine;
 pub mod random;
 pub mod specials;

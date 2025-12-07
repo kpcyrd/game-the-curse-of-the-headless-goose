@@ -56,7 +56,13 @@ pub fn main() -> anyhow::Result<()> {
 
         println!("Our move: {:?} ({:?})", our_move, our_move.to_decision());
 
-        fighter::turn(&mut rng, &mut us, &mut them, &our_move, &their_move);
+        fighter::turn(
+            &mut rng,
+            &mut us,
+            &mut them,
+            Some(&our_move),
+            Some(&their_move),
+        );
 
         if us.defeated() {
             println!("We have been defeated! Game over.");

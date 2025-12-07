@@ -1,6 +1,6 @@
-use core::fmt;
-
 use crate::{action::Move, random::Rng};
+use core::fmt;
+use log::debug;
 
 #[derive(Clone, Copy, PartialEq, Default)]
 pub struct Cooldown {
@@ -36,7 +36,8 @@ impl Cooldown {
                 .saturating_div(self.total)
                 .saturating_mul(self.value);
             let roll = rng.get();
-            if roll < chance {
+            if roll > chance {
+                debug!("Cooldown roll failed: {roll} > {chance}");
                 return false;
             }
         };

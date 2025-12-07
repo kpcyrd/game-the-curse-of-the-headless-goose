@@ -10,17 +10,34 @@ pub fn turn<R: Rng>(
     rng: &mut R,
     us: &mut Fighter,
     them: &mut Fighter,
-    our_move: &Move,
-    their_move: &Move,
+    mut our_move: Option<&Move>,
+    mut their_move: Option<&Move>,
 ) {
+    // Apply cooldown checks and rolls
+    info!("Their turn (early)");
+    if their_move
+        .take_if(|mv| !them.cooldown.attempt(rng, mv))
+        .is_some()
+    {
+        debug!("Move is on cooldown, cannot execute!");
+    }
+    info!("Our turn (early)");
+    if our_move
+        .take_if(|mv| !us.cooldown.attempt(rng, mv))
+        .is_some()
+    {
+        debug!("Move is on cooldown, cannot execute!");
+    }
+
+    // Apply moves
     info!("Their turn");
-    them.execute(rng, us, their_move, our_move);
+    them.execute(us, their_move, our_move);
     if us.defeated() {
         // If we were defeated, end the round early
         return;
     }
     info!("Our turn");
-    us.execute(rng, them, our_move, their_move);
+    us.execute(them, our_move, their_move);
 }
 
 pub struct Stats {
@@ -76,17 +93,10 @@ impl Fighter {
         }
     }
 
-    pub fn execute<R: Rng>(&mut self, rng: &mut R, other: &mut Self, mv: &Move, their_mv: &Move) {
-        // Before executing, check energy cost
-        if self.check_energy_cost(mv).is_none() {
+    pub fn execute(&mut self, other: &mut Self, mv: Option<&Move>, their_mv: Option<&Move>) {
+        let Some(mv) = mv else {
             return;
-        }
-
-        // Check cooldown of action
-        if !self.cooldown.attempt(rng, mv) {
-            debug!("Move is on cooldown, cannot execute!");
-            return;
-        }
+        };
 
         // Apply the cost of the move first
         if !self.drain_energy(mv) {
@@ -94,7 +104,10 @@ impl Fighter {
         }
 
         // Check if it goes through
-        if other.check_energy_cost(their_mv).is_some() && their_mv.blocks(mv) {
+        if let Some(their_mv) = their_mv
+            && other.check_energy_cost(their_mv).is_some()
+            && their_mv.blocks(mv)
+        {
             info!("Blocked!");
             return;
         }
@@ -163,7 +176,13 @@ mod tests {
         let mut fighter = FIGHTER.clone();
         let mut other = FIGHTER.clone();
         let mut rng = FastRandom::new();
-        turn(&mut rng, &mut fighter, &mut other, &Move::Three, &Move::Two);
+        turn(
+            &mut rng,
+            &mut fighter,
+            &mut other,
+            Some(&Move::Three),
+            Some(&Move::Two),
+        );
 
         assert_eq!(
             fighter,
@@ -196,7 +215,13 @@ mod tests {
         let mut fighter = FIGHTER.clone();
         let mut other = FIGHTER.clone();
         let mut rng = FastRandom::new();
-        turn(&mut rng, &mut fighter, &mut other, &Move::Three, &Move::Six);
+        turn(
+            &mut rng,
+            &mut fighter,
+            &mut other,
+            Some(&Move::Three),
+            Some(&Move::Six),
+        );
 
         assert_eq!(
             fighter,
@@ -233,8 +258,8 @@ mod tests {
             &mut rng,
             &mut fighter,
             &mut other,
-            &Move::Three,
-            &Move::Nine,
+            Some(&Move::Three),
+            Some(&Move::Nine),
         );
 
         assert_eq!(
@@ -268,7 +293,13 @@ mod tests {
         let mut fighter = FIGHTER.clone();
         let mut other = FIGHTER.clone();
         let mut rng = FastRandom::new();
-        turn(&mut rng, &mut fighter, &mut other, &Move::Nine, &Move::Four);
+        turn(
+            &mut rng,
+            &mut fighter,
+            &mut other,
+            Some(&Move::Nine),
+            Some(&Move::Four),
+        );
 
         assert_eq!(
             fighter,
@@ -301,7 +332,13 @@ mod tests {
         let mut fighter = FIGHTER.clone();
         let mut other = FIGHTER.clone();
         let mut rng = FastRandom::new();
-        turn(&mut rng, &mut fighter, &mut other, &Move::Nine, &Move::Six);
+        turn(
+            &mut rng,
+            &mut fighter,
+            &mut other,
+            Some(&Move::Nine),
+            Some(&Move::Six),
+        );
 
         assert_eq!(
             fighter,
@@ -338,8 +375,8 @@ mod tests {
             &mut rng,
             &mut fighter,
             &mut other,
-            &Move::Nine,
-            &Move::Three,
+            Some(&Move::Nine),
+            Some(&Move::Three),
         );
 
         assert_eq!(
@@ -375,7 +412,13 @@ mod tests {
         fighter.energy = 5;
         let mut other = FIGHTER.clone();
         let mut rng = FastRandom::new();
-        turn(&mut rng, &mut fighter, &mut other, &Move::One, &Move::Six);
+        turn(
+            &mut rng,
+            &mut fighter,
+            &mut other,
+            Some(&Move::One),
+            Some(&Move::Six),
+        );
         assert_eq!(
             fighter,
             Fighter {
@@ -409,7 +452,13 @@ mod tests {
         fighter.energy = 5;
         let mut other = FIGHTER.clone();
         let mut rng = FastRandom::new();
-        turn(&mut rng, &mut fighter, &mut other, &Move::One, &Move::Three);
+        turn(
+            &mut rng,
+            &mut fighter,
+            &mut other,
+            Some(&Move::One),
+            Some(&Move::Three),
+        );
         assert_eq!(
             fighter,
             Fighter {
@@ -432,6 +481,51 @@ mod tests {
                 recharge: 1,
                 special: Special::Heal,
                 cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Three),
+            }
+        );
+    }
+
+    #[test]
+    fn test_fighter_cooldown_fail_cant_block() {
+        let mut fighter = FIGHTER.clone();
+        let mut other = FIGHTER.clone();
+
+        let cd = other.cooldown.get_mut(&Move::Six).unwrap();
+        cd.value = 0;
+        cd.total = u8::MAX;
+        let cd = other.cooldown.clone();
+
+        let mut rng = FastRandom::new();
+        turn(
+            &mut rng,
+            &mut fighter,
+            &mut other,
+            Some(&Move::Three),
+            Some(&Move::Six),
+        );
+
+        assert_eq!(
+            fighter,
+            Fighter {
+                health: 10,
+                max_health: 10,
+                energy: 7,
+                max_energy: 10,
+                recharge: 1,
+                special: Special::Heal,
+                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Three),
+            }
+        );
+        assert_eq!(
+            other,
+            Fighter {
+                health: 7,
+                max_health: 10,
+                energy: 10,
+                max_energy: 10,
+                recharge: 1,
+                special: Special::Heal,
+                cooldown: cd.and_consumed(&Move::Six),
             }
         );
     }

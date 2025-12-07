@@ -40,7 +40,7 @@ impl Scene {
                 // Ensure the move is unlocked
                 player.cooldown.get(&mv)?;
 
-                fighter::turn(rng, player, enemy, &mv, their_move);
+                fighter::turn(rng, player, enemy, Some(&mv), Some(their_move));
                 *their_move = enemy.random_move(rng);
 
                 Some(Render::Redraw)
