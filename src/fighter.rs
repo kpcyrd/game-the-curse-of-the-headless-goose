@@ -69,7 +69,7 @@ impl Fighter {
         }
 
         // Check cooldown of action
-        if self.cooldown.get(mv).attempt(rng) {
+        if !self.cooldown.get(mv).attempt(rng) {
             debug!("Move is on cooldown, cannot execute!");
             return;
         }
@@ -128,6 +128,7 @@ impl Fighter {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::random::FastRandom;
 
     const FIGHTER: Fighter = Fighter::new(Stats {
         health: 10,
@@ -140,7 +141,8 @@ mod tests {
     fn test_fighter_both_fast() {
         let mut fighter = FIGHTER.clone();
         let mut other = FIGHTER.clone();
-        turn(&mut fighter, &mut other, &Move::Three, &Move::Two);
+        let mut rng = FastRandom::new();
+        turn(&mut rng, &mut fighter, &mut other, &Move::Three, &Move::Two);
 
         assert_eq!(
             fighter,
@@ -180,7 +182,8 @@ mod tests {
     fn test_fighter_fast_against_block() {
         let mut fighter = FIGHTER.clone();
         let mut other = FIGHTER.clone();
-        turn(&mut fighter, &mut other, &Move::Three, &Move::Six);
+        let mut rng = FastRandom::new();
+        turn(&mut rng, &mut fighter, &mut other, &Move::Three, &Move::Six);
 
         assert_eq!(
             fighter,
@@ -220,7 +223,14 @@ mod tests {
     fn test_fighter_fast_against_strong() {
         let mut fighter = FIGHTER.clone();
         let mut other = FIGHTER.clone();
-        turn(&mut fighter, &mut other, &Move::Three, &Move::Nine);
+        let mut rng = FastRandom::new();
+        turn(
+            &mut rng,
+            &mut fighter,
+            &mut other,
+            &Move::Three,
+            &Move::Nine,
+        );
 
         assert_eq!(
             fighter,
@@ -260,7 +270,8 @@ mod tests {
     fn test_fighter_both_strong() {
         let mut fighter = FIGHTER.clone();
         let mut other = FIGHTER.clone();
-        turn(&mut fighter, &mut other, &Move::Nine, &Move::Four);
+        let mut rng = FastRandom::new();
+        turn(&mut rng, &mut fighter, &mut other, &Move::Nine, &Move::Four);
 
         assert_eq!(
             fighter,
@@ -300,7 +311,8 @@ mod tests {
     fn test_fighter_strong_against_block() {
         let mut fighter = FIGHTER.clone();
         let mut other = FIGHTER.clone();
-        turn(&mut fighter, &mut other, &Move::Nine, &Move::Six);
+        let mut rng = FastRandom::new();
+        turn(&mut rng, &mut fighter, &mut other, &Move::Nine, &Move::Six);
 
         assert_eq!(
             fighter,
@@ -340,7 +352,14 @@ mod tests {
     fn test_fighter_strong_against_fast() {
         let mut fighter = FIGHTER.clone();
         let mut other = FIGHTER.clone();
-        turn(&mut fighter, &mut other, &Move::Nine, &Move::Three);
+        let mut rng = FastRandom::new();
+        turn(
+            &mut rng,
+            &mut fighter,
+            &mut other,
+            &Move::Nine,
+            &Move::Three,
+        );
 
         assert_eq!(
             fighter,
@@ -382,7 +401,8 @@ mod tests {
         fighter.health = 5;
         fighter.energy = 5;
         let mut other = FIGHTER.clone();
-        turn(&mut fighter, &mut other, &Move::One, &Move::Six);
+        let mut rng = FastRandom::new();
+        turn(&mut rng, &mut fighter, &mut other, &Move::One, &Move::Six);
         assert_eq!(
             fighter,
             Fighter {
@@ -423,7 +443,8 @@ mod tests {
         fighter.health = 5;
         fighter.energy = 5;
         let mut other = FIGHTER.clone();
-        turn(&mut fighter, &mut other, &Move::One, &Move::Three);
+        let mut rng = FastRandom::new();
+        turn(&mut rng, &mut fighter, &mut other, &Move::One, &Move::Three);
         assert_eq!(
             fighter,
             Fighter {

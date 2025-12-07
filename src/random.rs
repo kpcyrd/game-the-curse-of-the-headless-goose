@@ -54,6 +54,7 @@ pub struct FastRandom {
 
 #[cfg(not(target_os = "none"))]
 impl FastRandom {
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         Self {
             rng: fastrand::Rng::new(),

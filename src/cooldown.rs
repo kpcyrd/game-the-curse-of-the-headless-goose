@@ -28,6 +28,7 @@ impl Cooldown {
 
     pub fn attempt<R: Rng>(&mut self, rng: &mut R) -> bool {
         if self.value == self.total {
+            self.consume();
             true
         } else {
             let chance = u8::MAX
