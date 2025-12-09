@@ -102,9 +102,10 @@ fn main() -> ! {
             cooldown: 4,
             abilities: 5,
         });
-        us.cooldown.get_mut(&Move::Three).unwrap().value = 1;
         us.cooldown.get_mut(&Move::Zero).unwrap().value = 0;
-        us.cooldown.get_mut(&Move::Two).unwrap().value = 3;
+        us.cooldown.get_mut(&Move::Two).unwrap().value = 1;
+        us.cooldown.get_mut(&Move::Three).unwrap().value = 2;
+        us.cooldown.get_mut(&Move::Four).unwrap().value = 3;
 
         for (num, ability) in us.cooldown.iter().enumerate() {
             if let Some(ability) = ability {
