@@ -96,6 +96,10 @@ impl CooldownSet {
         self
     }
 
+    pub fn iter(&self) -> impl Iterator<Item = Option<&Cooldown>> {
+        self.values.iter().map(|cd| cd.as_ref())
+    }
+
     pub const fn get(&self, mv: &Move) -> Option<&Cooldown> {
         let slot = match mv {
             Move::Zero => &self.values[0],
