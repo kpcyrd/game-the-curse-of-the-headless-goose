@@ -2,12 +2,14 @@ use crate::{
     action::Move,
     fighter::{self, Fighter},
     gfx,
+    machine::Scene,
     random::Random,
 };
 use eh0::timer::CountDown;
 use embedded_graphics::{
     draw_target::DrawTarget,
     pixelcolor::{Rgb666, RgbColor},
+    prelude::Point,
 };
 use embedded_hal_bus::spi::ExclusiveDevice;
 use mipidsi::{
@@ -92,22 +94,52 @@ fn main() -> ! {
 
     let mut delay = timer.count_down();
 
+    let scene = Scene::Battle {
+        player: {
+            let mut us = Fighter::new(fighter::Stats {
+                health: 10,
+                energy: 10,
+                recharge: 1,
+                cooldown: 4,
+                abilities: 5,
+            });
+            us.cooldown.get_mut(&Move::Zero).unwrap().value = 0;
+            us.cooldown.get_mut(&Move::Two).unwrap().value = 1;
+            us.cooldown.get_mut(&Move::Three).unwrap().value = 2;
+            us.cooldown.get_mut(&Move::Four).unwrap().value = 3;
+            us
+        },
+        enemy: Fighter::new(fighter::Stats {
+            health: 30,
+            energy: 10,
+            recharge: 1,
+            cooldown: 2,
+            abilities: 10,
+        }),
+        their_move: Move::Five,
+    };
+
     display.clear(Rgb666::BLACK).unwrap();
     loop {
         // Render some stats
-        let mut us = Fighter::new(fighter::Stats {
-            health: 10,
-            energy: 10,
-            recharge: 1,
-            cooldown: 4,
-            abilities: 5,
-        });
-        us.cooldown.get_mut(&Move::Zero).unwrap().value = 0;
-        us.cooldown.get_mut(&Move::Two).unwrap().value = 1;
-        us.cooldown.get_mut(&Move::Three).unwrap().value = 2;
-        us.cooldown.get_mut(&Move::Four).unwrap().value = 3;
+        let Scene::Battle {
+            player,
+            enemy,
+            their_move,
+        } = &scene
+        else {
+            continue;
+        };
 
-        for (num, ability) in us.cooldown.iter().enumerate() {
+        gfx::stats::render(&mut display, Point::new(10, 175), player, None);
+        gfx::stats::render(
+            &mut display,
+            Point::new(gfx::WIDTH as i32, 10),
+            enemy,
+            Some(their_move),
+        );
+
+        for (num, ability) in player.cooldown.iter().enumerate() {
             if let Some(ability) = ability {
                 gfx::action::render(&mut display, num, &ability);
             }

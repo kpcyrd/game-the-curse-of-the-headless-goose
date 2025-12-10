@@ -405,6 +405,7 @@ name = "game-the-curse-of-the-headless-goose"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "arrayvec",
  "ascon",
  "cortex-m-rt",
  "defmt-rtt",
