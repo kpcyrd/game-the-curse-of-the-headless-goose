@@ -32,25 +32,42 @@ const COOLDOWN_WIDTH: u32 = 3;
 const COOLDOWN_STYLE: PrimitiveStyle<Rgb666> = PrimitiveStyleBuilder::new()
     .fill_color(Rgb666::CSS_ORANGE_RED)
     .build();
+const BLACK_STYLE: PrimitiveStyle<Rgb666> = PrimitiveStyleBuilder::new()
+    .fill_color(Rgb666::BLACK)
+    .build();
 
 fn render_cooldown<D: DrawTarget<Color = Rgb666>>(display: &mut D, rect: &Rectangle, cd: &Cooldown)
 where
     <D as DrawTarget>::Error: fmt::Debug,
 {
-    let cooldown_height = ((cd.value as u32 * RECT_INNER) / cd.total as u32).clamp(2, RECT_INNER);
+    let cooldown_height = if !cd.full() {
+        ((cd.value as u32 * RECT_INNER) / cd.total as u32).clamp(2, RECT_INNER)
+    } else {
+        0
+    };
 
-    let point = rect.top_left
-        + Point::new(
-            (RECT_SIZE - COOLDOWN_WIDTH - BORDER_STROKE.stroke_width) as i32,
-            (RECT_INNER - cooldown_height + BORDER_STROKE.stroke_width) as i32,
-        );
-    let size = Size::new(COOLDOWN_WIDTH, cooldown_height);
+    for (delta, size, color) in [
+        (
+            Point::new(0, 0),
+            Size::new(COOLDOWN_WIDTH, RECT_INNER - cooldown_height),
+            BLACK_STYLE,
+        ),
+        (
+            Point::new(0, (RECT_INNER - cooldown_height) as i32),
+            Size::new(COOLDOWN_WIDTH, cooldown_height),
+            COOLDOWN_STYLE,
+        ),
+    ] {
+        let point = rect.top_left
+            + Point::new(
+                (RECT_SIZE - COOLDOWN_WIDTH - BORDER_STROKE.stroke_width) as i32,
+                BORDER_STROKE.stroke_width as i32,
+            )
+            + delta;
 
-    let cooldown_rect = Rectangle::new(point, size);
-    cooldown_rect
-        .into_styled(COOLDOWN_STYLE)
-        .draw(display)
-        .unwrap();
+        let cooldown_rect = Rectangle::new(point, size);
+        cooldown_rect.into_styled(color).draw(display).unwrap();
+    }
 }
 
 pub fn render<D: DrawTarget<Color = Rgb666>>(display: &mut D, num: usize, cd: &Cooldown)
@@ -79,7 +96,5 @@ where
     .draw(display)
     .unwrap();
 
-    if !cd.full() {
-        render_cooldown(display, &rect, cd);
-    }
+    render_cooldown(display, &rect, cd);
 }
