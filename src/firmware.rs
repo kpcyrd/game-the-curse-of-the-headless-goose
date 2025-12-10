@@ -109,13 +109,17 @@ fn main() -> ! {
             us.cooldown.get_mut(&Move::Four).unwrap().value = 3;
             us
         },
-        enemy: Fighter::new(fighter::Stats {
-            health: 30,
-            energy: 10,
-            recharge: 1,
-            cooldown: 2,
-            abilities: 10,
-        }),
+        enemy: {
+            let mut them = Fighter::new(fighter::Stats {
+                health: 30,
+                energy: 10,
+                recharge: 1,
+                cooldown: 2,
+                abilities: 10,
+            });
+            them.cooldown.get_mut(&Move::Five).unwrap().value = 1;
+            them
+        },
         their_move: Move::Five,
     };
 

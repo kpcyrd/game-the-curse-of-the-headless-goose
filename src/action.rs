@@ -1,11 +1,23 @@
 use crate::input;
+use core::fmt;
 
-#[derive(Debug, PartialEq)]
+#[derive(PartialEq)]
 pub enum Decision {
     Block,
     FastAttack,
     StrongAttack,
     Special,
+}
+
+impl fmt::Debug for Decision {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Decision::Block => write!(f, "Block"),
+            Decision::FastAttack => write!(f, "Fast"),
+            Decision::StrongAttack => write!(f, "Strong"),
+            Decision::Special => write!(f, "Special"),
+        }
+    }
 }
 
 impl Decision {
