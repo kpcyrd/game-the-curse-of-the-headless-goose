@@ -35,7 +35,7 @@ where
             remaining
         };
 
-        point += Point::new(0, gfx::FONT.character_size.height as i32);
+        point += gfx::next_line(gfx::FONT);
         text = remaining.strip_prefix('\n').unwrap_or(remaining);
     }
 }

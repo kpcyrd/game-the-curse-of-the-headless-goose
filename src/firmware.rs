@@ -125,6 +125,7 @@ fn main() -> ! {
     display.clear(Rgb666::BLACK).unwrap();
     loop {
         match &scene {
+            Scene::Intro(intro) => gfx::intro::render(&mut display, intro),
             Scene::Dialogue(dialogue) => gfx::dialogue::render(&mut display, dialogue),
             Scene::Battle(battle) => {
                 gfx::battle::render(&mut display, battle);
