@@ -16,7 +16,7 @@ pub struct Campaign {}
 
 /// This holds the current scene of the game
 pub enum Scene {
-    Dialogue { text: &'static str },
+    Dialogue(Dialogue),
     Battle(Battle),
 }
 
@@ -27,6 +27,10 @@ impl Scene {
             Scene::Battle(battle) => battle.update(rng, event),
         }
     }
+}
+
+pub struct Dialogue {
+    pub text: &'static str,
 }
 
 pub struct Battle {

@@ -1,4 +1,5 @@
 pub mod battle;
+pub mod dialogue;
 
 use embedded_graphics::{
     mono_font::{MonoFont, MonoTextStyle, ascii::FONT_7X13},

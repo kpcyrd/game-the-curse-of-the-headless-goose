@@ -124,12 +124,12 @@ fn main() -> ! {
 
     display.clear(Rgb666::BLACK).unwrap();
     loop {
-        // Render some stats
-        let Scene::Battle(battle) = &scene else {
-            continue;
-        };
-
-        gfx::battle::render(&mut display, battle);
+        match &scene {
+            Scene::Dialogue(dialogue) => gfx::dialogue::render(&mut display, dialogue),
+            Scene::Battle(battle) => {
+                gfx::battle::render(&mut display, battle);
+            }
+        }
 
         delay.start(1.secs());
         let _ = nb::block!(delay.wait());
