@@ -2,14 +2,13 @@ use crate::{
     action::Move,
     fighter::{self, Fighter},
     gfx,
-    machine::Scene,
+    machine::{Battle, Scene},
     random::Random,
 };
 use eh0::timer::CountDown;
 use embedded_graphics::{
     draw_target::DrawTarget,
     pixelcolor::{Rgb666, RgbColor},
-    prelude::Point,
 };
 use embedded_hal_bus::spi::ExclusiveDevice;
 use mipidsi::{
@@ -94,7 +93,7 @@ fn main() -> ! {
 
     let mut delay = timer.count_down();
 
-    let scene = Scene::Battle {
+    let scene = Scene::Battle(Battle {
         player: {
             let mut us = Fighter::new(fighter::Stats {
                 health: 10,
@@ -121,33 +120,16 @@ fn main() -> ! {
             them
         },
         their_move: Move::Five,
-    };
+    });
 
     display.clear(Rgb666::BLACK).unwrap();
     loop {
         // Render some stats
-        let Scene::Battle {
-            player,
-            enemy,
-            their_move,
-        } = &scene
-        else {
+        let Scene::Battle(battle) = &scene else {
             continue;
         };
 
-        gfx::stats::render(&mut display, Point::new(10, 175), player, None);
-        gfx::stats::render(
-            &mut display,
-            Point::new(gfx::WIDTH as i32, 10),
-            enemy,
-            Some(their_move),
-        );
-
-        for (num, ability) in player.cooldown.iter().enumerate() {
-            if let Some(ability) = ability {
-                gfx::action::render(&mut display, num, &ability);
-            }
-        }
+        gfx::battle::render(&mut display, battle);
 
         delay.start(1.secs());
         let _ = nb::block!(delay.wait());

@@ -1,5 +1,4 @@
-pub mod action;
-pub mod stats;
+pub mod battle;
 
 use embedded_graphics::{
     mono_font::{MonoFont, MonoTextStyle, ascii::FONT_7X13},
