@@ -183,7 +183,6 @@ fn main() -> ! {
             None
         };
 
-        // game.tick(&mut render);
-        // scene.tick();
+        scene.tick();
     }
 }

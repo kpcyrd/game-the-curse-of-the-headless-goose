@@ -29,6 +29,14 @@ impl Scene {
             Scene::Battle(battle) => battle.update(rng, event),
         }
     }
+
+    pub fn tick(&mut self) {
+        match self {
+            Scene::Intro(_intro) => (),
+            Scene::Dialogue(_dialogue) => (),
+            Scene::Battle(_battle) => (),
+        }
+    }
 }
 
 #[derive(Default)]
@@ -98,6 +106,22 @@ impl Battle {
             Some(&mv),
             Some(&self.their_move),
         );
+
+        if self.player.defeated() {
+            // println!("We have been defeated! Game over.");
+            // TODO
+            return Some(Render::Redraw);
+        } else if self.enemy.defeated() {
+            // println!("They have been defeated! You win!");
+            // TODO
+            return Some(Render::Redraw);
+        }
+
+        // Recharge energy for both fighters
+        for fighter in [&mut self.player, &mut self.enemy] {
+            fighter.auto_recharge_energy();
+        }
+
         self.their_move = self.enemy.random_move(rng);
 
         Some(Render::Redraw)
