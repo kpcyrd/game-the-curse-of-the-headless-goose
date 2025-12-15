@@ -226,6 +226,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "eeprom24x"
+version = "0.7.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9f7a31bca283ff29097bb5e7c0dbdb39fbe165dda33b825e19f8ac04f15a8eef"
+dependencies = [
+ "embedded-hal 1.0.0",
+ "embedded-storage",
+]
+
+[[package]]
 name = "either"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -313,6 +323,12 @@ name = "embedded-io"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "edd0f118536f44f5ccd48bcb8b111bdc3de888b58c74639dfb034a357d0f206d"
+
+[[package]]
+name = "embedded-storage"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a21dea9854beb860f3062d10228ce9b976da520a73474aed3171ec276bc0c032"
 
 [[package]]
 name = "env_filter"
@@ -409,6 +425,7 @@ dependencies = [
  "ascon",
  "cortex-m-rt",
  "defmt-rtt",
+ "eeprom24x",
  "embedded-graphics",
  "embedded-hal 0.2.7",
  "embedded-hal 1.0.0",

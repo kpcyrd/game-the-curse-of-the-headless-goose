@@ -28,6 +28,7 @@ arrayvec = { version = "0.7.6", default-features = false }
 ascon = "0.4.0"
 cortex-m-rt = "0.7.3"
 defmt-rtt = "1"
+eeprom24x = "0.7.2"
 eh0 = { package = "embedded-hal", version = "0.2" }
 embedded-graphics = "0.8.1"
 embedded-hal = "1.0.0"

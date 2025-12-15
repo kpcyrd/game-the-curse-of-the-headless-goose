@@ -7,6 +7,7 @@ use crate::{
     random::Random,
 };
 // use eh0::timer::CountDown;
+use eeprom24x::{Eeprom24x, SlaveAddr};
 use embedded_graphics::{
     draw_target::DrawTarget,
     pixelcolor::{Rgb666, RgbColor},
@@ -20,9 +21,9 @@ use mipidsi::{
 use waveshare_rp2040_zero::{
     Pins, XOSC_CRYSTAL_FREQ, entry,
     hal::{
-        Sio,
+        I2C, Sio,
         clocks::{Clock, init_clocks_and_plls},
-        fugit::{/*ExtU32,*/ RateExtU32},
+        fugit::RateExtU32,
         gpio, pac,
         rosc::RingOscillator,
         spi,
@@ -95,6 +96,19 @@ fn main() -> ! {
         .init(&mut timer)
         .unwrap();
     display.clear(Rgb666::BLACK).unwrap();
+
+    // Setup Flash EEPROM
+    let i2c = I2C::i2c1(
+        pac.I2C1,
+        pins.gp26.into_pull_type().into_function(), // sda
+        pins.gp27.into_pull_type().into_function(), // scl
+        400.kHz(),
+        &mut pac.RESETS,
+        clocks.peripheral_clock.freq(),
+    );
+    let addr = SlaveAddr::Default;
+    let mut eeprom = Eeprom24x::new_24x256(i2c, addr);
+    let _read = eeprom.read_byte(0x00).unwrap();
 
     // Keypad pins
     let c2 = pins.gp13.into_pull_up_input();
