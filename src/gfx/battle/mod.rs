@@ -9,7 +9,12 @@ pub fn render<D: DrawTarget<Color = Rgb666>>(display: &mut D, battle: &Battle)
 where
     <D as DrawTarget>::Error: fmt::Debug,
 {
-    stats::render(display, Point::new(10, 175), &battle.player, None);
+    stats::render(
+        display,
+        Point::new(10, gfx::HEIGHT as i32 - 65),
+        &battle.player,
+        None,
+    );
     stats::render(
         display,
         Point::new(gfx::WIDTH as i32, 10),

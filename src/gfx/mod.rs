@@ -8,7 +8,7 @@ use embedded_graphics::{
     prelude::{Point, RgbColor},
 };
 
-pub const HEIGHT: u32 = 240;
+pub const HEIGHT: u32 = 480;
 pub const WIDTH: u32 = 320;
 
 pub const FONT: &MonoFont = &FONT_7X13;

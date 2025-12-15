@@ -14,7 +14,7 @@ use embedded_hal_bus::spi::ExclusiveDevice;
 use mipidsi::{
     interface::SpiInterface,
     models::ILI9486Rgb666,
-    options::{Orientation, Rotation},
+    options::{ColorOrder, Orientation, Rotation},
 };
 use waveshare_rp2040_zero::{
     Pins, XOSC_CRYSTAL_FREQ, entry,
@@ -64,11 +64,9 @@ fn main() -> ! {
     // Set up our SPI pins so they can be used by the SPI driver
     let mosi = pins.gp15.into_function::<gpio::FunctionSpi>();
     let sck = pins.gp14.into_function::<gpio::FunctionSpi>();
-    let cs = pins.gp9.into_push_pull_output();
-    let dc = pins.gp12.into_push_pull_output();
-    let reset = pins.gp11.into_push_pull_output();
-
-    // let mut bl = pins.gp0.into_push_pull_output();
+    let cs = pins.gp1.into_push_pull_output();
+    let dc = pins.gp28.into_push_pull_output();
+    let reset = pins.gp0.into_push_pull_output();
 
     let spi = spi::Spi::<_, _, _, 8>::new(pac.SPI1, (mosi, sck));
 
@@ -87,7 +85,12 @@ fn main() -> ! {
 
     let mut display = mipidsi::Builder::new(ILI9486Rgb666, di)
         .reset_pin(reset)
-        .orientation(Orientation::new().rotate(Rotation::Deg270))
+        .orientation(
+            Orientation::new()
+                .rotate(Rotation::Deg180)
+                .flip_horizontal(),
+        )
+        .color_order(ColorOrder::Bgr)
         .init(&mut timer)
         .unwrap();
 
