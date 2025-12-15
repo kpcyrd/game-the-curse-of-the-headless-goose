@@ -9,6 +9,8 @@ pub mod fighter;
 pub mod firmware;
 pub mod gfx;
 pub mod input;
+#[cfg(target_os = "none")]
+pub mod keypad;
 pub mod machine;
 pub mod random;
 pub mod specials;

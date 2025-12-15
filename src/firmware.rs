@@ -2,10 +2,11 @@ use crate::{
     action::Move,
     fighter::{self, Fighter},
     gfx,
-    machine::{Battle, Scene},
+    keypad::Keypad,
+    machine::{Battle, Render, Scene},
     random::Random,
 };
-use eh0::timer::CountDown;
+// use eh0::timer::CountDown;
 use embedded_graphics::{
     draw_target::DrawTarget,
     pixelcolor::{Rgb666, RgbColor},
@@ -21,7 +22,7 @@ use waveshare_rp2040_zero::{
     hal::{
         Sio,
         clocks::{Clock, init_clocks_and_plls},
-        fugit::{ExtU32, RateExtU32},
+        fugit::{/*ExtU32,*/ RateExtU32},
         gpio, pac,
         rosc::RingOscillator,
         spi,
@@ -50,7 +51,7 @@ fn main() -> ! {
     let mut timer = Timer::new(pac.TIMER, &mut pac.RESETS, &clocks);
 
     let rosc = RingOscillator::new(pac.ROSC).initialize();
-    let _rng = Random::new(rosc);
+    let mut rng = Random::new(rosc);
 
     // Configure gpio
     let sio = Sio::new(pac.SIO);
@@ -93,10 +94,30 @@ fn main() -> ! {
         .color_order(ColorOrder::Bgr)
         .init(&mut timer)
         .unwrap();
+    display.clear(Rgb666::BLACK).unwrap();
 
-    let mut delay = timer.count_down();
+    // Keypad pins
+    let c2 = pins.gp13.into_pull_up_input();
+    let r1 = pins.gp12.into_pull_up_input();
+    let c1 = pins.gp11.into_pull_up_input();
+    let r4 = pins.gp10.into_pull_up_input();
+    let c3 = pins.gp9.into_pull_up_input();
+    let r3 = pins.gp8.into_pull_up_input();
+    let r2 = pins.gp7.into_pull_up_input();
 
-    let scene = Scene::Battle(Battle {
+    let mut keypad = Keypad {
+        c1,
+        c2,
+        c3,
+        r1,
+        r2,
+        r3,
+        r4,
+    };
+
+    // let mut delay = timer.count_down();
+
+    let mut scene = Scene::Battle(Battle {
         player: {
             let mut us = Fighter::new(fighter::Stats {
                 health: 10,
@@ -125,8 +146,17 @@ fn main() -> ! {
         their_move: Move::Five,
     });
 
-    display.clear(Rgb666::BLACK).unwrap();
+    // keypad input handling
+    let mut current_key = None;
+    let mut render = None;
+
+    // game loop
     loop {
+        if render == Some(Render::Clear) {
+            display.clear(Rgb666::BLACK).unwrap();
+            render = Some(Render::Redraw);
+        }
+
         match &scene {
             Scene::Intro(intro) => gfx::intro::render(&mut display, intro),
             Scene::Dialogue(dialogue) => gfx::dialogue::render(&mut display, dialogue),
@@ -135,7 +165,25 @@ fn main() -> ! {
             }
         }
 
+        /*
         delay.start(1.secs());
         let _ = nb::block!(delay.wait());
+        */
+
+        // events
+        let mut key = None;
+        keypad = keypad.read(&mut key);
+
+        current_key = if let Some(key) = key {
+            if Some(key) != current_key {
+                render = scene.update(&mut rng, key);
+            }
+            Some(key)
+        } else {
+            None
+        };
+
+        // game.tick(&mut render);
+        // scene.tick();
     }
 }

@@ -34,6 +34,7 @@ pub fn render<D: DrawTarget<Color = Rgb666>>(
         .enumerate()
     {
         write!(&mut text, "{label}: {value}").unwrap();
+        gfx::text_fill(&mut text);
         Text::with_baseline(
             &text,
             point + Point::new(0, i as i32 * CHAR_HEIGHT),
@@ -54,6 +55,7 @@ pub fn render<D: DrawTarget<Color = Rgb666>>(
             let percent = (cd.value as u32 * 100) / cd.total as u32;
             write!(&mut text, " ({percent}%)").unwrap();
         }
+        gfx::text_fill(&mut text);
 
         Text::with_baseline(
             &text,
