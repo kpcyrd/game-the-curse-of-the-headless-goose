@@ -1,12 +1,9 @@
-use crate::{gfx, machine::Intro};
-use core::fmt;
-use embedded_graphics::{
-    Drawable,
-    draw_target::DrawTarget,
-    pixelcolor::Rgb666,
-    prelude::Point,
-    text::{Baseline, Text},
+use crate::{
+    gfx::{self, text::TextBox},
+    machine::Intro,
 };
+use core::fmt;
+use embedded_graphics::{draw_target::DrawTarget, pixelcolor::Rgb666, prelude::Point};
 
 const LINES: usize = 4;
 const WIDTH: usize = 25;
@@ -28,15 +25,7 @@ where
     let mut iter = menu.iter();
     let mut point = Point::new(0, 0);
     for _ in 0..LINES {
-        if let Some(line) = iter.next() {
-            Text::with_baseline(line, point, gfx::TEXT_STYLE, Baseline::Top)
-                .draw(display)
-                .unwrap();
-            gfx::clear_remaining_text_box(display, point, gfx::FONT, line, WIDTH);
-        } else {
-            gfx::clear_remaining_text_box(display, point, gfx::FONT, "", WIDTH);
-        }
-
+        TextBox::new(point, &gfx::TEXT_STYLE, WIDTH).render_and_clear(display, iter.next());
         point += gfx::next_line(gfx::FONT);
     }
 }
