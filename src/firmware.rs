@@ -134,7 +134,7 @@ fn main() -> ! {
 
     // keypad input handling
     let mut current_key = None;
-    let mut render = None;
+    let mut render = Some(Render::Redraw);
 
     // game loop
     loop {
@@ -143,11 +143,13 @@ fn main() -> ! {
             render = Some(Render::Redraw);
         }
 
-        match &scene {
-            Scene::Intro(intro) => gfx::intro::render(&mut display, intro),
-            Scene::Dialogue(dialogue) => gfx::dialogue::render(&mut display, dialogue),
-            Scene::Battle(battle) => {
-                gfx::battle::render(&mut display, battle);
+        if render.take() == Some(Render::Redraw) {
+            match &scene {
+                Scene::Intro(intro) => gfx::intro::render(&mut display, intro),
+                Scene::Dialogue(dialogue) => gfx::dialogue::render(&mut display, dialogue),
+                Scene::Battle(battle) => {
+                    gfx::battle::render(&mut display, battle);
+                }
             }
         }
 
