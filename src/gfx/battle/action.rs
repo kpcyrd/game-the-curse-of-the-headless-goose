@@ -1,4 +1,4 @@
-use crate::{cooldown::Cooldown, gfx};
+use crate::{cooldown::Cooldown, gfx::{self, BLACK_STYLE}};
 use core::fmt;
 use embedded_graphics::{
     Drawable,
@@ -31,9 +31,6 @@ const BORDER_STROKE: PrimitiveStyle<Rgb666> = PrimitiveStyleBuilder::new()
 const COOLDOWN_WIDTH: u32 = 3;
 const COOLDOWN_STYLE: PrimitiveStyle<Rgb666> = PrimitiveStyleBuilder::new()
     .fill_color(Rgb666::CSS_ORANGE_RED)
-    .build();
-const BLACK_STYLE: PrimitiveStyle<Rgb666> = PrimitiveStyleBuilder::new()
-    .fill_color(Rgb666::BLACK)
     .build();
 
 fn render_cooldown<D: DrawTarget<Color = Rgb666>>(display: &mut D, rect: &Rectangle, cd: &Cooldown)

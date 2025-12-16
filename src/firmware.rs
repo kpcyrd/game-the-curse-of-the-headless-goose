@@ -3,7 +3,7 @@ use crate::{
     fighter::{self, Fighter},
     gfx,
     keypad::Keypad,
-    machine::{Battle, Render, Scene},
+    machine::{Battle, Intro, Render, Scene},
     random::Random,
 };
 // use eh0::timer::CountDown;
@@ -131,6 +131,7 @@ fn main() -> ! {
 
     // let mut delay = timer.count_down();
 
+    /*
     let mut scene = Scene::Battle(Battle {
         player: {
             let mut us = Fighter::new(fighter::Stats {
@@ -159,6 +160,8 @@ fn main() -> ! {
         },
         their_move: Move::Five,
     });
+    */
+    let mut scene = Scene::Intro(Intro::default());
 
     // keypad input handling
     let mut current_key = None;
