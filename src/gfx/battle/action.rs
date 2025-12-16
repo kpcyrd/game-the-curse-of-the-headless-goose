@@ -1,4 +1,7 @@
-use crate::{cooldown::Cooldown, gfx::{self, BLACK_STYLE}};
+use crate::{
+    cooldown::Cooldown,
+    gfx::{self, BLACK_STYLE},
+};
 use core::fmt;
 use embedded_graphics::{
     Drawable,

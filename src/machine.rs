@@ -12,7 +12,49 @@ pub enum Render {
 }
 
 /// This holds the state of the higher-order game
-pub struct Campaign {}
+pub struct Campaign {
+    pending_scene: Option<Scene>,
+}
+
+impl Campaign {
+    pub const fn new() -> Self {
+        Self {
+            pending_scene: None,
+        }
+    }
+
+    pub fn start_game(&mut self) {
+        let scene = Scene::Battle(Battle {
+            player: {
+                let mut us = Fighter::new(fighter::Stats {
+                    health: 10,
+                    energy: 10,
+                    recharge: 1,
+                    cooldown: 4,
+                    abilities: 5,
+                });
+                us.cooldown.get_mut(&Move::Zero).unwrap().value = 0;
+                us.cooldown.get_mut(&Move::Two).unwrap().value = 1;
+                us.cooldown.get_mut(&Move::Three).unwrap().value = 2;
+                us.cooldown.get_mut(&Move::Four).unwrap().value = 3;
+                us
+            },
+            enemy: {
+                let mut them = Fighter::new(fighter::Stats {
+                    health: 30,
+                    energy: 10,
+                    recharge: 1,
+                    cooldown: 2,
+                    abilities: 10,
+                });
+                them.cooldown.get_mut(&Move::Five).unwrap().value = 1;
+                them
+            },
+            their_move: Move::Five,
+        });
+        self.pending_scene = Some(scene);
+    }
+}
 
 /// This holds the current scene of the game
 pub enum Scene {
@@ -22,12 +64,21 @@ pub enum Scene {
 }
 
 impl Scene {
-    pub fn update<R: Rng>(&mut self, rng: &mut R, event: input::Event) -> Option<Render> {
-        match self {
-            Scene::Intro(intro) => intro.update(event),
-            Scene::Dialogue(dialogue) => dialogue.update(event),
-            Scene::Battle(battle) => battle.update(rng, event),
+    pub fn update<R: Rng>(
+        &mut self,
+        rng: &mut R,
+        campaign: &mut Campaign,
+        event: input::Event,
+    ) -> Option<Render> {
+        let render = match self {
+            Scene::Intro(intro) => intro.update(campaign, event),
+            Scene::Dialogue(dialogue) => dialogue.update(campaign, event),
+            Scene::Battle(battle) => battle.update(rng, campaign, event),
+        };
+        if let Some(pending) = campaign.pending_scene.take() {
+            *self = pending;
         }
+        render
     }
 
     pub fn tick(&mut self) {
@@ -45,11 +96,11 @@ pub struct Intro {
 }
 
 impl Intro {
-    pub fn update(&mut self, event: input::Event) -> Option<Render> {
+    pub fn update(&mut self, campaign: &mut Campaign, event: input::Event) -> Option<Render> {
         if !self.confirm_erase {
             match event {
                 input::Event::One => {
-                    // TODO: Start the game
+                    campaign.start_game();
                     Some(Render::Clear)
                 }
                 input::Event::Two => {
@@ -81,7 +132,7 @@ pub struct Dialogue {
 }
 
 impl Dialogue {
-    pub fn update(&mut self, _event: input::Event) -> Option<Render> {
+    pub fn update(&mut self, _campaign: &mut Campaign, _event: input::Event) -> Option<Render> {
         None
     }
 }
@@ -93,7 +144,12 @@ pub struct Battle {
 }
 
 impl Battle {
-    pub fn update<R: Rng>(&mut self, rng: &mut R, event: input::Event) -> Option<Render> {
+    pub fn update<R: Rng>(
+        &mut self,
+        rng: &mut R,
+        _campaign: &mut Campaign,
+        event: input::Event,
+    ) -> Option<Render> {
         let mv = Move::from_input(event)?;
 
         // Ensure the move is unlocked

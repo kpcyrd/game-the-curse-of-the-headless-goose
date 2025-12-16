@@ -1,9 +1,7 @@
 use crate::{
-    action::Move,
-    fighter::{self, Fighter},
     gfx,
     keypad::Keypad,
-    machine::{Battle, Intro, Render, Scene},
+    machine::{Campaign, Intro, Render, Scene},
     random::Random,
 };
 // use eh0::timer::CountDown;
@@ -131,36 +129,7 @@ fn main() -> ! {
 
     // let mut delay = timer.count_down();
 
-    /*
-    let mut scene = Scene::Battle(Battle {
-        player: {
-            let mut us = Fighter::new(fighter::Stats {
-                health: 10,
-                energy: 10,
-                recharge: 1,
-                cooldown: 4,
-                abilities: 5,
-            });
-            us.cooldown.get_mut(&Move::Zero).unwrap().value = 0;
-            us.cooldown.get_mut(&Move::Two).unwrap().value = 1;
-            us.cooldown.get_mut(&Move::Three).unwrap().value = 2;
-            us.cooldown.get_mut(&Move::Four).unwrap().value = 3;
-            us
-        },
-        enemy: {
-            let mut them = Fighter::new(fighter::Stats {
-                health: 30,
-                energy: 10,
-                recharge: 1,
-                cooldown: 2,
-                abilities: 10,
-            });
-            them.cooldown.get_mut(&Move::Five).unwrap().value = 1;
-            them
-        },
-        their_move: Move::Five,
-    });
-    */
+    let mut campaign = Campaign::new();
     let mut scene = Scene::Intro(Intro::default());
 
     // keypad input handling
@@ -193,7 +162,7 @@ fn main() -> ! {
 
         current_key = if let Some(key) = key {
             if Some(key) != current_key {
-                render = scene.update(&mut rng, key);
+                render = scene.update(&mut rng, &mut campaign, key);
             }
             Some(key)
         } else {
