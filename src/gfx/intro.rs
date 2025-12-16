@@ -3,10 +3,20 @@ use crate::{
     machine::Intro,
 };
 use core::fmt;
-use embedded_graphics::{draw_target::DrawTarget, pixelcolor::Rgb666, prelude::Point};
+use embedded_graphics::{
+    draw_target::DrawTarget,
+    pixelcolor::Rgb666,
+    prelude::{Point, Size},
+    primitives::{Rectangle, StyledDrawable},
+};
 
 const LINES: usize = 4;
 const WIDTH: usize = 25;
+
+const TEXT_OFFSET: Point = Point::new(
+    (gfx::WIDTH - (gfx::FONT.character_size.width * WIDTH as u32)) as i32 / 2,
+    300,
+);
 
 const MENU: &[&str] = &["1: Start New Game", "2: Erase Save Data", "3: todo"];
 const CONFIRM: &[&str] = &[
@@ -20,10 +30,17 @@ pub fn render<D: DrawTarget<Color = Rgb666>>(display: &mut D, intro: &Intro)
 where
     <D as DrawTarget>::Error: fmt::Debug,
 {
-    let menu = if intro.confirm_erase { CONFIRM } else { MENU };
+    let menu = if intro.confirm_erase {
+        CONFIRM
+    } else {
+        Rectangle::with_center(Point::new(gfx::WIDTH as i32 / 2, 150), Size::new(200, 200))
+            .draw_styled(&gfx::WHITE_STYLE, display)
+            .unwrap();
+        MENU
+    };
 
     let mut iter = menu.iter();
-    let mut point = Point::new(0, 0);
+    let mut point = TEXT_OFFSET;
     for _ in 0..LINES {
         TextBox::new(point, &gfx::TEXT_STYLE, WIDTH).render_and_clear(display, iter.next());
         point += gfx::next_line(gfx::FONT);
