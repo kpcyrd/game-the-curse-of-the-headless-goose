@@ -68,6 +68,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a23eb6b1614318a8071c9b2521f36b424b2c83db5eb3a0fead4a6c0809af6e61"
 
 [[package]]
+name = "arrayref"
+version = "0.3.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "76a2e8124351fda1ef8aaaa3bbd7ebbcb486bbcd4225aca0aa0d84bb2db8fecb"
+
+[[package]]
 name = "arrayvec"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -226,6 +232,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "djb2"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8eb8886ecca3498d7a9dab291fc7c9dc293c7b35a74d60065a9ba0d510f5d39f"
+
+[[package]]
 name = "eeprom24x"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -323,6 +335,16 @@ name = "embedded-io"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "edd0f118536f44f5ccd48bcb8b111bdc3de888b58c74639dfb034a357d0f206d"
+
+[[package]]
+name = "embedded-savegame"
+version = "0.2.0"
+source = "git+https://github.com/kpcyrd/embedded-savegame#d45cada85796d45ca15a9c0502a84e93e7fb954c"
+dependencies = [
+ "arrayref",
+ "djb2",
+ "eeprom24x",
+]
 
 [[package]]
 name = "embedded-storage"
@@ -430,6 +452,7 @@ dependencies = [
  "embedded-hal 0.2.7",
  "embedded-hal 1.0.0",
  "embedded-hal-bus",
+ "embedded-savegame",
  "env_logger",
  "fastrand",
  "itoa",
@@ -616,9 +639,9 @@ dependencies = [
 
 [[package]]
 name = "portable-atomic"
-version = "1.11.1"
+version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f84267b20a16ea918e43c6a88433c2d54fa145c92a811b5b047ccbe153674483"
+checksum = "f59e70c4aef1e55797c2e8fd94a4f2a973fc972cfde0e0b05f683667b0cd39dd"
 
 [[package]]
 name = "portable-atomic-util"

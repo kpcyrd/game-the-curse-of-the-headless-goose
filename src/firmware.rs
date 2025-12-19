@@ -11,6 +11,7 @@ use embedded_graphics::{
     pixelcolor::{Rgb666, RgbColor},
 };
 use embedded_hal_bus::spi::ExclusiveDevice;
+use embedded_savegame::storage::Storage;
 use mipidsi::{
     interface::SpiInterface,
     models::ILI9486Rgb666,
@@ -29,6 +30,10 @@ use waveshare_rp2040_zero::{
         watchdog::Watchdog,
     },
 };
+
+const SLOT_SIZE: usize = 64;
+// This is half of what we have available (512), but makes scanning faster
+const SLOT_COUNT: usize = 256;
 
 #[entry]
 fn main() -> ! {
@@ -105,8 +110,9 @@ fn main() -> ! {
         clocks.peripheral_clock.freq(),
     );
     let addr = SlaveAddr::Default;
-    let mut eeprom = Eeprom24x::new_24x256(i2c, addr);
-    let _read = eeprom.read_byte(0x00).unwrap();
+    let eeprom = Eeprom24x::new_24x256(i2c, addr);
+    let mut storage = Storage::<_, SLOT_SIZE, SLOT_COUNT>::new(eeprom);
+    let _slot = storage.scan().unwrap();
 
     // Keypad pins
     let c2 = pins.gp13.into_pull_up_input();

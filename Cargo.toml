@@ -33,6 +33,7 @@ eh0 = { package = "embedded-hal", version = "0.2" }
 embedded-graphics = "0.8.1"
 embedded-hal = "1.0.0"
 embedded-hal-bus = "0.3.0"
+embedded-savegame = { git = "https://github.com/kpcyrd/embedded-savegame", features = ["eeprom24x"] }
 itoa = "1.0.15"
 log = "0.4.29"
 mipidsi = "0.9.0"
