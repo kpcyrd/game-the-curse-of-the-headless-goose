@@ -339,7 +339,7 @@ checksum = "edd0f118536f44f5ccd48bcb8b111bdc3de888b58c74639dfb034a357d0f206d"
 [[package]]
 name = "embedded-savegame"
 version = "0.2.0"
-source = "git+https://github.com/kpcyrd/embedded-savegame#d45cada85796d45ca15a9c0502a84e93e7fb954c"
+source = "git+https://github.com/kpcyrd/embedded-savegame#098804cb235a752c7eca72a9f5888bad354a4b42"
 dependencies = [
  "arrayref",
  "djb2",

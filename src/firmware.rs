@@ -31,10 +31,6 @@ use waveshare_rp2040_zero::{
     },
 };
 
-const SLOT_SIZE: usize = 64;
-// This is half of what we have available (512), but makes scanning faster
-const SLOT_COUNT: usize = 256;
-
 #[entry]
 fn main() -> ! {
     let mut pac = pac::Peripherals::take().unwrap();
@@ -111,8 +107,7 @@ fn main() -> ! {
     );
     let addr = SlaveAddr::Default;
     let eeprom = Eeprom24x::new_24x256(i2c, addr);
-    let mut storage = Storage::<_, SLOT_SIZE, SLOT_COUNT>::new(eeprom);
-    let _slot = storage.scan().unwrap();
+    let flash = Storage::new(eeprom);
 
     // Keypad pins
     let c2 = pins.gp13.into_pull_up_input();
@@ -135,7 +130,7 @@ fn main() -> ! {
 
     // let mut delay = timer.count_down();
 
-    let mut campaign = Campaign::new();
+    let mut campaign = Campaign::new(flash);
     let mut scene = Scene::Intro(Intro::default());
 
     // keypad input handling

@@ -4,6 +4,7 @@ use crate::{
     input,
     random::Rng,
 };
+use embedded_savegame::storage::{Flash, Storage};
 
 #[derive(PartialEq, Eq)]
 pub enum Render {
@@ -11,14 +12,20 @@ pub enum Render {
     Redraw,
 }
 
+const SLOT_SIZE: usize = 64;
+// This is half of what we have available (512), but makes scanning faster
+const SLOT_COUNT: usize = 256;
+
 /// This holds the state of the higher-order game
-pub struct Campaign {
+pub struct Campaign<F: Flash> {
+    flash: Storage<F, SLOT_SIZE, SLOT_COUNT>,
     pending_scene: Option<Scene>,
 }
 
-impl Campaign {
-    pub const fn new() -> Self {
+impl<F: Flash> Campaign<F> {
+    pub const fn new(flash: Storage<F, SLOT_SIZE, SLOT_COUNT>) -> Self {
         Self {
+            flash,
             pending_scene: None,
         }
     }
@@ -64,10 +71,10 @@ pub enum Scene {
 }
 
 impl Scene {
-    pub fn update<R: Rng>(
+    pub fn update<R: Rng, F: Flash>(
         &mut self,
         rng: &mut R,
-        campaign: &mut Campaign,
+        campaign: &mut Campaign<F>,
         event: input::Event,
     ) -> Option<Render> {
         let render = match self {
@@ -96,7 +103,11 @@ pub struct Intro {
 }
 
 impl Intro {
-    pub fn update(&mut self, campaign: &mut Campaign, event: input::Event) -> Option<Render> {
+    pub fn update<F: Flash>(
+        &mut self,
+        campaign: &mut Campaign<F>,
+        event: input::Event,
+    ) -> Option<Render> {
         if !self.confirm_erase {
             match event {
                 input::Event::One => {
@@ -118,7 +129,9 @@ impl Intro {
                     Some(Render::Redraw)
                 }
                 input::Event::Hash => {
-                    // TODO: Erase save data
+                    // Erase all save data
+                    campaign.flash.erase_all().unwrap();
+                    self.confirm_erase = false;
                     Some(Render::Redraw)
                 }
                 _ => None,
@@ -132,7 +145,11 @@ pub struct Dialogue {
 }
 
 impl Dialogue {
-    pub fn update(&mut self, _campaign: &mut Campaign, _event: input::Event) -> Option<Render> {
+    pub fn update<F: Flash>(
+        &mut self,
+        _campaign: &mut Campaign<F>,
+        _event: input::Event,
+    ) -> Option<Render> {
         None
     }
 }
@@ -144,10 +161,10 @@ pub struct Battle {
 }
 
 impl Battle {
-    pub fn update<R: Rng>(
+    pub fn update<R: Rng, F: Flash>(
         &mut self,
         rng: &mut R,
-        _campaign: &mut Campaign,
+        _campaign: &mut Campaign<F>,
         event: input::Event,
     ) -> Option<Render> {
         let mv = Move::from_input(event)?;
