@@ -18,7 +18,8 @@ const TEXT_OFFSET: Point = Point::new(
     300,
 );
 
-const MENU: &[&str] = &["1: Start New Game", "2: Erase Save Data", "3: todo"];
+const MENU_NEW: &[&str] = &["1: Start New Game", "2: Erase Save Data", "3: todo"];
+const MENU_CONTINUE: &[&str] = &["1: Continue Game", "2: Erase Save Data", "3: todo"];
 const CONFIRM: &[&str] = &[
     "Are you sure?",
     "",
@@ -36,7 +37,11 @@ where
         Rectangle::with_center(Point::new(gfx::WIDTH as i32 / 2, 150), Size::new(200, 200))
             .draw_styled(&gfx::WHITE_STYLE, display)
             .unwrap();
-        MENU
+        if intro.has_save {
+            MENU_CONTINUE
+        } else {
+            MENU_NEW
+        }
     };
 
     let mut iter = menu.iter();
@@ -53,13 +58,16 @@ mod tests {
 
     #[test]
     fn test_lines_consts() {
-        let calculated = [MENU, CONFIRM].iter().map(|list| list.len()).max();
+        let calculated = [MENU_NEW, MENU_CONTINUE, CONFIRM]
+            .iter()
+            .map(|list| list.len())
+            .max();
         assert_eq!(Some(LINES), calculated)
     }
 
     #[test]
     fn test_width_consts() {
-        let width = [MENU, CONFIRM]
+        let width = [MENU_NEW, MENU_CONTINUE, CONFIRM]
             .iter()
             .flat_map(|list| list.iter())
             .map(|line| line.len())

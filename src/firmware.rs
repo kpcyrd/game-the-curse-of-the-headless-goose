@@ -1,7 +1,7 @@
 use crate::{
     gfx,
     keypad::Keypad,
-    machine::{Campaign, Intro, Render, Scene},
+    machine::{Campaign, Render, Scene},
     random::Random,
 };
 // use eh0::timer::CountDown;
@@ -131,7 +131,7 @@ fn main() -> ! {
     // let mut delay = timer.count_down();
 
     let mut campaign = Campaign::new(flash);
-    let mut scene = Scene::Intro(Intro::default());
+    let mut scene = Scene::Intro(campaign.intro());
 
     // keypad input handling
     let mut current_key = None;

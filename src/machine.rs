@@ -19,6 +19,7 @@ const SLOT_COUNT: usize = 256;
 /// This holds the state of the higher-order game
 pub struct Campaign<F: Flash> {
     flash: Storage<F, SLOT_SIZE, SLOT_COUNT>,
+    save_slot: Option<embedded_savegame::Slot>,
     pending_scene: Option<Scene>,
 }
 
@@ -26,11 +27,26 @@ impl<F: Flash> Campaign<F> {
     pub const fn new(flash: Storage<F, SLOT_SIZE, SLOT_COUNT>) -> Self {
         Self {
             flash,
+            save_slot: None,
             pending_scene: None,
         }
     }
 
+    pub fn intro(&mut self) -> Intro {
+        self.save_slot = self.flash.scan().unwrap();
+        Intro {
+            has_save: self.save_slot.is_some(),
+            confirm_erase: false,
+        }
+    }
+
     pub fn start_game(&mut self) {
+        if let Some(slot) = &mut self.save_slot {
+            // TODO: do something with self.save_slot
+        } else {
+            self.flash.append(&mut [1, 3, 3, 7]).unwrap();
+        }
+
         let scene = Scene::Battle(Battle {
             player: {
                 let mut us = Fighter::new(fighter::Stats {
@@ -99,6 +115,7 @@ impl Scene {
 
 #[derive(Default)]
 pub struct Intro {
+    pub has_save: bool,
     pub confirm_erase: bool,
 }
 
@@ -131,6 +148,8 @@ impl Intro {
                 input::Event::Hash => {
                     // Erase all save data
                     campaign.flash.erase_all().unwrap();
+                    campaign.save_slot = None;
+                    self.has_save = false;
                     self.confirm_erase = false;
                     Some(Render::Redraw)
                 }
