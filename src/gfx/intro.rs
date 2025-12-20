@@ -4,10 +4,12 @@ use crate::{
 };
 use core::fmt;
 use embedded_graphics::{
+    Drawable,
     draw_target::DrawTarget,
     pixelcolor::Rgb666,
     prelude::{Point, Size},
     primitives::{Rectangle, StyledDrawable},
+    text::{Baseline, Text},
 };
 
 const LINES: usize = 4;
@@ -18,8 +20,12 @@ const TEXT_OFFSET: Point = Point::new(
     300,
 );
 
-const MENU_NEW: &[&str] = &["1: Start New Game", "2: Erase Save Data", "3: todo"];
-const MENU_CONTINUE: &[&str] = &["1: Continue Game", "2: Erase Save Data", "3: todo"];
+const MENU_NEW: &[&str] = &["2: Start New Game", "3: Erase Save Data"];
+const MENU_CONTINUE: &[&str] = &[
+    "1: Continue Game",
+    "2: Start New Game",
+    "3: Erase Save Data",
+];
 const CONFIRM: &[&str] = &[
     "Are you sure?",
     "",
@@ -31,24 +37,35 @@ pub fn render<D: DrawTarget<Color = Rgb666>>(display: &mut D, intro: &Intro)
 where
     <D as DrawTarget>::Error: fmt::Debug,
 {
-    let menu = if intro.confirm_erase {
-        CONFIRM
+    if let Some(save_info) = &intro.debug_save {
+        Text::with_baseline(
+            save_info.as_str(),
+            Point::zero(),
+            gfx::TEXT_STYLE,
+            Baseline::Top,
+        )
+        .draw(display)
+        .unwrap();
     } else {
-        Rectangle::with_center(Point::new(gfx::WIDTH as i32 / 2, 150), Size::new(200, 200))
-            .draw_styled(&gfx::WHITE_STYLE, display)
-            .unwrap();
-        if intro.has_save {
-            MENU_CONTINUE
+        let menu = if intro.confirm_erase.is_some() {
+            CONFIRM
         } else {
-            MENU_NEW
-        }
-    };
+            Rectangle::with_center(Point::new(gfx::WIDTH as i32 / 2, 150), Size::new(200, 200))
+                .draw_styled(&gfx::WHITE_STYLE, display)
+                .unwrap();
+            if intro.has_save {
+                MENU_CONTINUE
+            } else {
+                MENU_NEW
+            }
+        };
 
-    let mut iter = menu.iter();
-    let mut point = TEXT_OFFSET;
-    for _ in 0..LINES {
-        TextBox::new(point, &gfx::TEXT_STYLE, WIDTH).render_and_clear(display, iter.next());
-        point += gfx::next_line(gfx::FONT);
+        let mut iter = menu.iter();
+        let mut point = TEXT_OFFSET;
+        for _ in 0..LINES {
+            TextBox::new(point, &gfx::TEXT_STYLE, WIDTH).render_and_clear(display, iter.next());
+            point += gfx::next_line(gfx::FONT);
+        }
     }
 }
 
