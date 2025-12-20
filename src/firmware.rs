@@ -31,6 +31,8 @@ use waveshare_rp2040_zero::{
     },
 };
 
+const KEY_DEBOUNCE: u16 = 2_000;
+
 #[entry]
 fn main() -> ! {
     let mut pac = pac::Peripherals::take().unwrap();
@@ -136,6 +138,7 @@ fn main() -> ! {
     // keypad input handling
     let mut current_key = None;
     let mut render = Some(Render::Redraw);
+    let mut key_debounce = 0u16;
 
     // game loop
     loop {
@@ -163,11 +166,15 @@ fn main() -> ! {
         let mut key = None;
         keypad = keypad.read(&mut key);
 
+        key_debounce = key_debounce.saturating_sub(1);
         current_key = if let Some(key) = key {
             if Some(key) != current_key {
                 render = scene.update(&mut rng, &mut campaign, key);
             }
+            key_debounce = KEY_DEBOUNCE;
             Some(key)
+        } else if key_debounce > 0 {
+            current_key
         } else {
             None
         };
