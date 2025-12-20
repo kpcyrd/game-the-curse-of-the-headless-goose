@@ -459,8 +459,8 @@ dependencies = [
  "log",
  "mipidsi",
  "nb 1.1.0",
- "panic-halt",
  "rand_core",
+ "rp2040-panic-usb-boot",
  "waveshare-rp2040-zero",
 ]
 
@@ -613,12 +613,6 @@ name = "once_cell_polyfill"
 version = "1.70.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
-
-[[package]]
-name = "panic-halt"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a513e167849a384b7f9b746e517604398518590a9142f4846a32e3c2a4de7b11"
 
 [[package]]
 name = "paste"
@@ -787,6 +781,15 @@ dependencies = [
  "cortex-m-rt",
  "critical-section",
  "vcell",
+]
+
+[[package]]
+name = "rp2040-panic-usb-boot"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "01ea03783e5d4bfa7ae0504dea4e5aa7d03d18e1694241de3e102adf8966c355"
+dependencies = [
+ "cortex-m",
 ]
 
 [[package]]

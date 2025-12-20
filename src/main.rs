@@ -4,7 +4,7 @@
 #[cfg(target_os = "none")]
 use defmt_rtt as _;
 #[cfg(target_os = "none")]
-use panic_halt as _;
+use rp2040_panic_usb_boot as _;
 
 #[cfg(target_os = "none")]
 #[allow(unused_imports)]

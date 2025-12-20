@@ -39,8 +39,8 @@ itoa = "1.0.15"
 log = "0.4.29"
 mipidsi = "0.9.0"
 nb = "1.1.0"
-panic-halt = "1"
 rand_core = "0.6"
+rp2040-panic-usb-boot = "0.6.0"
 
 [target.'cfg(target_os="none")'.dependencies]
 waveshare-rp2040-zero = "0.8"
