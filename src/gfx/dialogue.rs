@@ -1,4 +1,4 @@
-use crate::{gfx, machine::Dialogue};
+use crate::{gfx, machine::dialogue::Dialogue};
 use core::fmt;
 use embedded_graphics::{
     Drawable,

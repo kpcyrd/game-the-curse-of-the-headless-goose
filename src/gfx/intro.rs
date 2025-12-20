@@ -1,6 +1,6 @@
 use crate::{
     gfx::{self, text::TextBox},
-    machine::Intro,
+    machine::intro::Intro,
 };
 use core::fmt;
 use embedded_graphics::{

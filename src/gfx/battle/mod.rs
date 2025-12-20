@@ -1,7 +1,7 @@
 pub mod action;
 pub mod stats;
 
-use crate::{gfx, machine::Battle};
+use crate::{gfx, machine::battle::Battle};
 use core::fmt;
 use embedded_graphics::{draw_target::DrawTarget, pixelcolor::Rgb666, prelude::Point};
 
