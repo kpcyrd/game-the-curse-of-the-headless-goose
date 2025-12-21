@@ -13,10 +13,26 @@ use embedded_graphics_colorcast::Image;
 
 const LINE_WIDTH: u32 = gfx::WIDTH / gfx::FONT.character_size.width;
 const AVATAR_SIZE: Size = Size::new(150, 200);
-const AVATAR_POINT: Point = Point::new(0, (gfx::HEIGHT - AVATAR_SIZE.height) as i32);
+const AVATAR_POINT_LEFT: Point = Point::new(0, (gfx::HEIGHT - AVATAR_SIZE.height) as i32);
+const AVATAR_POINT_RIGHT: Point =
+    Point::new((gfx::WIDTH - AVATAR_SIZE.width) as i32, AVATAR_POINT_LEFT.y);
 
 const SLOTH: ImageRaw<BinaryColor> =
     ImageRaw::new(include_bytes!("../../art/sloth.raw"), AVATAR_SIZE.width);
+
+const GOOSE: ImageRaw<BinaryColor> =
+    ImageRaw::new(include_bytes!("../../art/goose.raw"), AVATAR_SIZE.width);
+
+impl Decoration {
+    pub fn image(&self) -> Option<(Point, ImageRaw<'static, BinaryColor>)> {
+        match self {
+            Decoration::Blank => None,
+            Decoration::Chapter => None,
+            Decoration::Sloth => Some((AVATAR_POINT_LEFT, SLOTH)),
+            Decoration::Goose => Some((AVATAR_POINT_RIGHT, GOOSE)),
+        }
+    }
+}
 
 pub fn render<D: DrawTarget<Color = Rgb666>>(display: &mut D, dialogue: &mut Dialogue)
 where
@@ -40,24 +56,20 @@ where
     };
 
     // Render some type of decoration (or the text as headline)
-    match decoration {
-        Decoration::Blank => {}
-        Decoration::Chapter => {
-            Text::with_alignment(
-                text,
-                display.bounding_box().center(),
-                gfx::CHAPTER_STYLE,
-                Alignment::Center,
-            )
+    if decoration == Decoration::Chapter {
+        Text::with_alignment(
+            text,
+            display.bounding_box().center(),
+            gfx::CHAPTER_STYLE,
+            Alignment::Center,
+        )
+        .draw(display)
+        .unwrap();
+        return;
+    } else if let Some((point, img)) = decoration.image() {
+        Image::new(&img, point, Rgb666::WHITE)
             .draw(display)
             .unwrap();
-            return;
-        }
-        Decoration::Sloth => {
-            Image::new(&SLOTH, AVATAR_POINT, Rgb666::WHITE)
-                .draw(display)
-                .unwrap();
-        }
     }
 
     // Render "normal" text

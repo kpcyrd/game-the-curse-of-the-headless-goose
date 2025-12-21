@@ -7,6 +7,7 @@ pub enum Decoration {
     Blank,
     Chapter,
     Sloth,
+    Goose,
 }
 
 pub const SCENES: &[Story] = &[
@@ -45,7 +46,7 @@ pub const SCENES: &[Story] = &[
         ),
         (
             Decoration::Sloth,
-            "Less complaints, and to my surprise, this job turned out to be less",
+            "Less complaints, and to my surprise, this job event turned out to be less",
         ),
         (Decoration::Sloth, "fishy."),
         (Decoration::Sloth, "heh."),
