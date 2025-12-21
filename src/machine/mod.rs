@@ -8,6 +8,7 @@ use crate::{
     input,
     machine::{battle::Battle, dialogue::Dialogue, intro::Intro},
     random::Rng,
+    story,
 };
 use embedded_savegame::storage::{Flash, Storage};
 
@@ -112,6 +113,7 @@ impl<F: Flash> Campaign<F> {
             abilities,
         };
 
+        /*
         let scene = Scene::Battle(Battle {
             player: Fighter::new(self.stats),
             enemy: {
@@ -128,6 +130,26 @@ impl<F: Flash> Campaign<F> {
             their_move: Move::Five,
         });
         self.pending_scene = Some(scene);
+        */
+
+        self.pick_scene();
+    }
+
+    fn pick_scene(&mut self) {
+        self.pending_scene = Some(
+            if let Some(scene) = story::SCENES.get(self.progress as usize) {
+                match scene {
+                    story::Story::Dialogue(text) => Scene::Dialogue(Dialogue { text, progress: 0 }),
+                }
+            } else {
+                Scene::Intro(self.intro())
+            },
+        );
+    }
+
+    pub fn progress_next(&mut self) {
+        self.progress = self.progress.saturating_add(1);
+        self.pick_scene();
     }
 }
 
@@ -152,8 +174,10 @@ impl Scene {
         };
         if let Some(pending) = campaign.pending_scene.take() {
             *self = pending;
+            Some(Render::Clear)
+        } else {
+            render
         }
-        render
     }
 
     pub fn tick(&mut self) {

@@ -15,7 +15,9 @@ where
     <D as DrawTarget>::Error: fmt::Debug,
 {
     let mut point = Point::new(0, 0);
-    let mut text = dialogue.text;
+    let Some(mut text) = dialogue.text.get(dialogue.progress).copied() else {
+        return;
+    };
 
     while !text.is_empty() && point.y < gfx::HEIGHT as i32 {
         let max = text
