@@ -21,10 +21,23 @@ const SLOT_SIZE: usize = 64;
 // This is half of what we have available (512), but makes scanning faster
 const SLOT_COUNT: usize = 256;
 
+// Maximum size we are willing to save/load
+const SAVE_SIZE: usize = 256;
+
+// Default stats for new games
+const DEFAULT_HEALTH: u16 = 10;
+const DEFAULT_ENERGY: u16 = 10;
+const DEFAULT_RECHARGE: u16 = 1;
+const DEFAULT_COOLDOWN: u8 = 4;
+const DEFAULT_ABILITIES: u8 = 5;
+
 /// This holds the state of the higher-order game
 pub struct Campaign<F: Flash> {
     flash: Storage<F, SLOT_SIZE, SLOT_COUNT>,
     save_slot: Option<embedded_savegame::Slot>,
+    progress: u16,
+    money: u16,
+    stats: fighter::Stats,
     pending_scene: Option<Scene>,
 }
 
@@ -33,6 +46,9 @@ impl<F: Flash> Campaign<F> {
         Self {
             flash,
             save_slot: None,
+            progress: 0,
+            money: 0,
+            stats: fighter::Stats::zero(),
             pending_scene: None,
         }
     }
@@ -46,28 +62,58 @@ impl<F: Flash> Campaign<F> {
         }
     }
 
-    pub fn start_game(&mut self) {
-        if let Some(slot) = &mut self.save_slot {
-            // TODO: do something with self.save_slot
+    fn parse_u16(buf: &[u8], default: u16) -> (u16, &[u8]) {
+        if let Some((value, buf)) = buf.split_at_checked(2) {
+            let value = u16::from_be_bytes(value.try_into().unwrap());
+            (value, buf)
         } else {
-            self.flash.append(&mut [1, 3, 3, 7]).unwrap();
+            (default, &[])
         }
+    }
+
+    fn parse_u8(buf: &[u8], default: u8) -> (u8, &[u8]) {
+        if let Some((value, buf)) = buf.split_at_checked(1) {
+            (value[0], buf)
+        } else {
+            (default, &[])
+        }
+    }
+
+    pub fn start_game(&mut self) {
+        let mut buf = [0u8; SAVE_SIZE];
+        let buf = if let Some(slot) = &mut self.save_slot {
+            // Load the savegame
+            let loaded = self.flash.read(slot.idx, &mut buf).unwrap();
+            // TODO: if this failed, don't silently discard
+            loaded.map(|s| &*s).unwrap_or_default()
+        } else {
+            // Write an empty savegame
+            // TODO: it may be enough to just write an empty slice, but no time to experiment right now
+            self.flash.append(&mut [0, 0]).unwrap();
+            &[]
+        };
+
+        let (progress, buf) = Self::parse_u16(buf, 0);
+        let (money, buf) = Self::parse_u16(buf, 0);
+
+        let (health, buf) = Self::parse_u16(buf, DEFAULT_HEALTH);
+        let (energy, buf) = Self::parse_u16(buf, DEFAULT_ENERGY);
+        let (recharge, buf) = Self::parse_u16(buf, DEFAULT_RECHARGE);
+        let (cooldown, buf) = Self::parse_u8(buf, DEFAULT_COOLDOWN);
+        let (abilities, _buf) = Self::parse_u8(buf, DEFAULT_ABILITIES);
+
+        self.progress = progress;
+        self.money = money;
+        self.stats = fighter::Stats {
+            health,
+            energy,
+            recharge,
+            cooldown,
+            abilities,
+        };
 
         let scene = Scene::Battle(Battle {
-            player: {
-                let mut us = Fighter::new(fighter::Stats {
-                    health: 10,
-                    energy: 10,
-                    recharge: 1,
-                    cooldown: 4,
-                    abilities: 5,
-                });
-                us.cooldown.get_mut(&Move::Zero).unwrap().value = 0;
-                us.cooldown.get_mut(&Move::Two).unwrap().value = 1;
-                us.cooldown.get_mut(&Move::Three).unwrap().value = 2;
-                us.cooldown.get_mut(&Move::Four).unwrap().value = 3;
-                us
-            },
+            player: Fighter::new(self.stats),
             enemy: {
                 let mut them = Fighter::new(fighter::Stats {
                     health: 30,

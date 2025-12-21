@@ -14,3 +14,4 @@ pub mod keypad;
 pub mod machine;
 pub mod random;
 pub mod specials;
+pub mod story;

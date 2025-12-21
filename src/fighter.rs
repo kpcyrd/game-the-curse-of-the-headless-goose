@@ -30,12 +30,26 @@ pub fn turn<R: Rng>(
     us.execute(them, our_move, their_move);
 }
 
+#[derive(Clone, Copy)]
 pub struct Stats {
     pub health: u16,
     pub energy: u16,
     pub recharge: u16,
     pub cooldown: u8,
     pub abilities: u8,
+}
+
+impl Stats {
+    // This doesn't make much sense, but let's us notice if we don't initialize properly
+    pub const fn zero() -> Self {
+        Self {
+            health: 0,
+            energy: 0,
+            recharge: 0,
+            cooldown: 0,
+            abilities: 0,
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Clone)]
