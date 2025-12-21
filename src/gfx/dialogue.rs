@@ -1,24 +1,53 @@
-use crate::{gfx, machine::dialogue::Dialogue};
+use crate::{gfx, machine::dialogue::Dialogue, story::Decoration};
 use core::fmt;
 use embedded_graphics::{
     Drawable,
     draw_target::DrawTarget,
-    pixelcolor::Rgb666,
-    prelude::Point,
-    text::{Baseline, Text},
+    image::ImageRaw,
+    pixelcolor::{BinaryColor, Rgb666},
+    prelude::{Point, RgbColor, Size},
+    text::{Alignment, Baseline, Text},
 };
+use embedded_graphics_colorcast::Image;
 
 const LINE_WIDTH: u32 = gfx::WIDTH / gfx::FONT.character_size.width;
+const AVATAR_SIZE: Size = Size::new(150, 200);
+const AVATAR_POINT: Point = Point::new(0, (gfx::HEIGHT - AVATAR_SIZE.height) as i32);
+
+const SLOTH: ImageRaw<BinaryColor> =
+    ImageRaw::new(include_bytes!("../../art/sloth.raw"), AVATAR_SIZE.width);
 
 pub fn render<D: DrawTarget<Color = Rgb666>>(display: &mut D, dialogue: &Dialogue)
 where
     <D as DrawTarget>::Error: fmt::Debug,
 {
     let mut point = Point::new(0, 0);
-    let Some(mut text) = dialogue.text.get(dialogue.progress).copied() else {
+    let Some((decoration, mut text)) = dialogue.text.get(dialogue.progress).copied() else {
         return;
     };
 
+    // Render some type of decoration (or the text as headline)
+    match decoration {
+        Decoration::Blank => {}
+        Decoration::Chapter => {
+            Text::with_alignment(
+                text,
+                display.bounding_box().center(),
+                gfx::CHAPTER_STYLE,
+                Alignment::Center,
+            )
+            .draw(display)
+            .unwrap();
+            return;
+        }
+        Decoration::Sloth => {
+            Image::new(&SLOTH, AVATAR_POINT, Rgb666::WHITE)
+                .draw(display)
+                .unwrap();
+        }
+    }
+
+    // Render "normal" text
     while !text.is_empty() && point.y < gfx::HEIGHT as i32 {
         let max = text
             .find('\n')

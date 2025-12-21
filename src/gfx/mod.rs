@@ -5,7 +5,10 @@ pub mod text;
 
 use arrayvec::ArrayString;
 use embedded_graphics::{
-    mono_font::{MonoFont, MonoTextStyle, MonoTextStyleBuilder, ascii::FONT_7X13},
+    mono_font::{
+        MonoFont, MonoTextStyle, MonoTextStyleBuilder,
+        ascii::{FONT_7X13, FONT_9X15_BOLD},
+    },
     pixelcolor::Rgb666,
     prelude::{Point, RgbColor},
     primitives::{PrimitiveStyle, PrimitiveStyleBuilder},
@@ -17,6 +20,12 @@ pub const WIDTH: u32 = 320;
 pub const FONT: &MonoFont = &FONT_7X13;
 pub const TEXT_STYLE: MonoTextStyle<Rgb666> = MonoTextStyleBuilder::new()
     .font(FONT)
+    .text_color(Rgb666::WHITE)
+    .background_color(Rgb666::BLACK)
+    .build();
+
+pub const CHAPTER_STYLE: MonoTextStyle<Rgb666> = MonoTextStyleBuilder::new()
+    .font(&FONT_9X15_BOLD)
     .text_color(Rgb666::WHITE)
     .background_color(Rgb666::BLACK)
     .build();

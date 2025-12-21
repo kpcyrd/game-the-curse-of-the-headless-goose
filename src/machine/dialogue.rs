@@ -1,11 +1,12 @@
 use crate::{
     input,
     machine::{Campaign, Render},
+    story::Decoration,
 };
 use embedded_savegame::storage::Flash;
 
 pub struct Dialogue {
-    pub text: &'static [&'static str],
+    pub text: &'static [(Decoration, &'static str)],
     pub progress: usize,
 }
 

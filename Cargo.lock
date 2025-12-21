@@ -276,6 +276,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "embedded-graphics-colorcast"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "562aa3dba87dff44ab4412e1b4c8d631ffae896c2d163924d8f77223bc02390c"
+dependencies = [
+ "embedded-graphics",
+]
+
+[[package]]
 name = "embedded-graphics-core"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -449,6 +458,7 @@ dependencies = [
  "defmt-rtt",
  "eeprom24x",
  "embedded-graphics",
+ "embedded-graphics-colorcast",
  "embedded-hal 0.2.7",
  "embedded-hal 1.0.0",
  "embedded-hal-bus",
