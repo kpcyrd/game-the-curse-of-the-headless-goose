@@ -13,5 +13,6 @@ pub mod input;
 pub mod keypad;
 pub mod machine;
 pub mod random;
+pub mod save;
 pub mod specials;
 pub mod story;

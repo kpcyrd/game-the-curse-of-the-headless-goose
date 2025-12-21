@@ -8,6 +8,7 @@ use crate::{
     input,
     machine::{battle::Battle, dialogue::Dialogue, intro::Intro},
     random::Rng,
+    save::Save,
     story,
 };
 use embedded_savegame::storage::{Flash, Storage};
@@ -21,9 +22,6 @@ pub enum Render {
 const SLOT_SIZE: usize = 64;
 // This is half of what we have available (512), but makes scanning faster
 const SLOT_COUNT: usize = 256;
-
-// Maximum size we are willing to save/load
-const SAVE_SIZE: usize = 256;
 
 // Default stats for new games
 const DEFAULT_HEALTH: u16 = 10;
@@ -63,54 +61,31 @@ impl<F: Flash> Campaign<F> {
         }
     }
 
-    fn parse_u16(buf: &[u8], default: u16) -> (u16, &[u8]) {
-        if let Some((value, buf)) = buf.split_at_checked(2) {
-            let value = u16::from_be_bytes(value.try_into().unwrap());
-            (value, buf)
-        } else {
-            (default, &[])
-        }
-    }
-
-    fn parse_u8(buf: &[u8], default: u8) -> (u8, &[u8]) {
-        if let Some((value, buf)) = buf.split_at_checked(1) {
-            (value[0], buf)
-        } else {
-            (default, &[])
-        }
-    }
-
     pub fn start_game(&mut self) {
-        let mut buf = [0u8; SAVE_SIZE];
-        let buf = if let Some(slot) = &mut self.save_slot {
+        let mut save = Save::new();
+
+        if let Some(slot) = &mut self.save_slot {
             // Load the savegame
-            let loaded = self.flash.read(slot.idx, &mut buf).unwrap();
             // TODO: if this failed, don't silently discard
-            loaded.map(|s| &*s).unwrap_or_default()
+            if let Some(slice) = self.flash.read(slot.idx, &mut save.buf).unwrap() {
+                let len = slice.len();
+                save.reset(len);
+            }
         } else {
             // Write an empty savegame
             // TODO: it may be enough to just write an empty slice, but no time to experiment right now
             self.flash.append(&mut [0, 0]).unwrap();
-            &[]
-        };
+        }
 
-        let (progress, buf) = Self::parse_u16(buf, 0);
-        let (money, buf) = Self::parse_u16(buf, 0);
+        self.progress = save.pull_u16(0);
+        self.money = save.pull_u16(0);
 
-        let (health, buf) = Self::parse_u16(buf, DEFAULT_HEALTH);
-        let (energy, buf) = Self::parse_u16(buf, DEFAULT_ENERGY);
-        let (recharge, buf) = Self::parse_u16(buf, DEFAULT_RECHARGE);
-        let (cooldown, buf) = Self::parse_u8(buf, DEFAULT_COOLDOWN);
-        let (abilities, _buf) = Self::parse_u8(buf, DEFAULT_ABILITIES);
-
-        self.progress = progress;
-        self.money = money;
         self.stats = fighter::Stats {
-            health,
-            energy,
-            recharge,
-            cooldown,
-            abilities,
+            health: save.pull_u16(DEFAULT_HEALTH),
+            energy: save.pull_u16(DEFAULT_ENERGY),
+            recharge: save.pull_u16(DEFAULT_RECHARGE),
+            cooldown: save.pull_u8(DEFAULT_COOLDOWN),
+            abilities: save.pull_u8(DEFAULT_ABILITIES),
         };
 
         /*
@@ -147,8 +122,23 @@ impl<F: Flash> Campaign<F> {
         );
     }
 
+    fn write_save(&mut self) {
+        let mut save = Save::new();
+        save.push_u16(self.progress);
+        save.push_u16(self.money);
+
+        save.push_u16(self.stats.health);
+        save.push_u16(self.stats.energy);
+        save.push_u16(self.stats.recharge);
+        save.push_u8(self.stats.cooldown);
+        save.push_u8(self.stats.abilities);
+
+        self.flash.append(save.slice()).unwrap();
+    }
+
     pub fn progress_next(&mut self) {
         self.progress = self.progress.saturating_add(1);
+        self.write_save();
         self.pick_scene();
     }
 }
