@@ -6,14 +6,16 @@ use core::fmt;
 use embedded_graphics::{
     Drawable,
     draw_target::DrawTarget,
-    pixelcolor::Rgb666,
-    prelude::{Point, Size},
-    primitives::{Rectangle, StyledDrawable},
+    image::ImageRaw,
+    pixelcolor::{BinaryColor, Rgb666},
+    prelude::{Point, RgbColor, Size},
+    primitives::Rectangle,
     text::{Baseline, Text},
 };
+use embedded_graphics_colorcast::Image;
 
 const LINES: usize = 4;
-const WIDTH: usize = 25;
+const WIDTH: usize = 22;
 
 const TEXT_OFFSET: Point = Point::new(
     (gfx::WIDTH - (gfx::FONT.character_size.width * WIDTH as u32)) as i32 / 2,
@@ -26,12 +28,9 @@ const MENU_CONTINUE: &[&str] = &[
     "2: Start New Game",
     "3: Erase Save Data",
 ];
-const CONFIRM: &[&str] = &[
-    "Are you sure?",
-    "",
-    "#: Yes, erase my savegame",
-    "*: Cancel",
-];
+const CONFIRM: &[&str] = &["Are you sure?", "", "#: Yes, erase savegame", "*: Cancel"];
+
+const SPLASH: ImageRaw<BinaryColor> = ImageRaw::new(include_bytes!("../../art/splash.raw"), 200);
 
 pub fn render<D: DrawTarget<Color = Rgb666>>(display: &mut D, intro: &Intro)
 where
@@ -50,9 +49,12 @@ where
         let menu = if intro.confirm_erase.is_some() {
             CONFIRM
         } else {
-            Rectangle::with_center(Point::new(gfx::WIDTH as i32 / 2, 150), Size::new(200, 200))
-                .draw_styled(&gfx::WHITE_STYLE, display)
+            let rect =
+                Rectangle::with_center(Point::new(gfx::WIDTH as i32 / 2, 150), Size::new(200, 200));
+            Image::new(&SPLASH, rect.top_left, Rgb666::WHITE)
+                .draw(display)
                 .unwrap();
+
             if intro.has_save {
                 MENU_CONTINUE
             } else {

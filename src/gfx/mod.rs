@@ -33,9 +33,11 @@ pub const CHAPTER_STYLE: MonoTextStyle<Rgb666> = MonoTextStyleBuilder::new()
 const BLACK_STYLE: PrimitiveStyle<Rgb666> = PrimitiveStyleBuilder::new()
     .fill_color(Rgb666::BLACK)
     .build();
+/*
 const WHITE_STYLE: PrimitiveStyle<Rgb666> = PrimitiveStyleBuilder::new()
     .fill_color(Rgb666::WHITE)
     .build();
+*/
 
 pub const fn next_line(font: &MonoFont) -> Point {
     Point::new(0, font.character_size.height as i32)

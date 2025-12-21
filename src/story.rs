@@ -2,7 +2,7 @@ pub enum Story {
     Dialogue(&'static [(Decoration, &'static str)]),
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub enum Decoration {
     Blank,
     Chapter,

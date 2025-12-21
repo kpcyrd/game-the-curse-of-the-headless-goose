@@ -148,7 +148,7 @@ fn main() -> ! {
         }
 
         if render.take() == Some(Render::Redraw) {
-            match &scene {
+            match &mut scene {
                 Scene::Intro(intro) => gfx::intro::render(&mut display, intro),
                 Scene::Dialogue(dialogue) => gfx::dialogue::render(&mut display, dialogue),
                 Scene::Battle(battle) => {
