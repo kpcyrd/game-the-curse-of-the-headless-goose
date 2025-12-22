@@ -1,6 +1,7 @@
 // Maximum size we are willing to save/load
 const SAVE_SIZE: usize = 256;
 
+#[derive(Clone, Copy)]
 pub struct Save {
     pub buf: [u8; SAVE_SIZE],
     pub cursor: usize,
@@ -40,8 +41,7 @@ impl Save {
 
     pub fn pull_u16(&mut self, default: u16) -> u16 {
         if let Some(value) = self.take(2) {
-            let value = u16::from_be_bytes(value.try_into().unwrap());
-            value
+            u16::from_be_bytes(value.try_into().unwrap())
         } else {
             default
         }
@@ -70,6 +70,12 @@ impl Save {
 
     pub fn push_u8(&mut self, value: u8) {
         self.push(&[value]);
+    }
+}
+
+impl Default for Save {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
