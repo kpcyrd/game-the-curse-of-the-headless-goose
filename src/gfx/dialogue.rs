@@ -23,6 +23,9 @@ const SLOTH: ImageRaw<BinaryColor> =
 const GOOSE: ImageRaw<BinaryColor> =
     ImageRaw::new(include_bytes!("../../art/goose.raw"), AVATAR_SIZE.width);
 
+const PHONE: ImageRaw<BinaryColor> =
+    ImageRaw::new(include_bytes!("../../art/phone.raw"), AVATAR_SIZE.width);
+
 impl Decoration {
     pub fn image(&self) -> Option<(Point, ImageRaw<'static, BinaryColor>)> {
         match self {
@@ -30,6 +33,7 @@ impl Decoration {
             Decoration::Chapter => None,
             Decoration::Sloth => Some((AVATAR_POINT_LEFT, SLOTH)),
             Decoration::Goose => Some((AVATAR_POINT_RIGHT, GOOSE)),
+            Decoration::Phone => Some((AVATAR_POINT_LEFT, PHONE)),
         }
     }
 }
