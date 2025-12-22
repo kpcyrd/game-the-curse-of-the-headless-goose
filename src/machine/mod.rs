@@ -3,7 +3,6 @@ pub mod dialogue;
 pub mod intro;
 
 use crate::{
-    action::Move,
     fighter::{self, Fighter},
     input,
     machine::{battle::Battle, dialogue::Dialogue, intro::Intro},
@@ -28,7 +27,8 @@ const DEFAULT_HEALTH: u16 = 10;
 const DEFAULT_ENERGY: u16 = 10;
 const DEFAULT_RECHARGE: u16 = 1;
 const DEFAULT_COOLDOWN: u8 = 4;
-const DEFAULT_ABILITIES: u16 = 0b11111; // First 5 abilities unlocked
+const DEFAULT_ABILITIES: u16 = 0b1101;
+// const DEFAULT_ABILITIES: u16 = 0b11111; // First 5 abilities unlocked
 
 /// This holds the state of the higher-order game
 pub struct Campaign<F: Flash> {
@@ -61,7 +61,7 @@ impl<F: Flash> Campaign<F> {
         }
     }
 
-    pub fn start_game(&mut self) {
+    pub fn start_game<R: Rng>(&mut self, rng: &mut R) {
         let mut save = Save::new();
 
         if let Some(slot) = &mut self.save_slot {
@@ -107,14 +107,24 @@ impl<F: Flash> Campaign<F> {
         self.pending_scene = Some(scene);
         */
 
-        self.pick_scene();
+        self.pick_scene(rng);
     }
 
-    fn pick_scene(&mut self) {
+    fn pick_scene<R: Rng>(&mut self, rng: &mut R) {
         self.pending_scene = Some(
             if let Some(scene) = story::SCENES.get(self.progress as usize) {
                 match scene {
                     story::Story::Dialogue(text) => Scene::Dialogue(Dialogue::new(text)),
+                    story::Story::Battle(enemy) => {
+                        let enemy = Fighter::new(*enemy);
+                        let their_move = enemy.random_move(rng);
+
+                        Scene::Battle(Battle {
+                            player: Fighter::new(self.stats),
+                            enemy,
+                            their_move,
+                        })
+                    }
                 }
             } else {
                 Scene::Intro(self.intro())
@@ -136,10 +146,10 @@ impl<F: Flash> Campaign<F> {
         self.flash.append(save.slice()).unwrap();
     }
 
-    pub fn progress_next(&mut self) {
+    pub fn progress_next<R: Rng>(&mut self, rng: &mut R) {
         self.progress = self.progress.saturating_add(1);
         self.write_save();
-        self.pick_scene();
+        self.pick_scene(rng);
     }
 }
 
@@ -158,8 +168,8 @@ impl Scene {
         event: input::Event,
     ) -> Option<Render> {
         let render = match self {
-            Scene::Intro(intro) => intro.update(campaign, event),
-            Scene::Dialogue(dialogue) => dialogue.update(campaign, event),
+            Scene::Intro(intro) => intro.update(rng, campaign, event),
+            Scene::Dialogue(dialogue) => dialogue.update(rng, campaign, event),
             Scene::Battle(battle) => battle.update(rng, campaign, event),
         };
         if let Some(pending) = campaign.pending_scene.take() {

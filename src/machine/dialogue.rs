@@ -1,6 +1,7 @@
 use crate::{
     input,
     machine::{Campaign, Render},
+    random::Rng,
     story::Decoration,
 };
 use embedded_savegame::storage::Flash;
@@ -20,8 +21,9 @@ impl Dialogue {
         }
     }
 
-    pub fn update<F: Flash>(
+    pub fn update<R: Rng, F: Flash>(
         &mut self,
+        rng: &mut R,
         campaign: &mut Campaign<F>,
         event: input::Event,
     ) -> Option<Render> {
@@ -36,7 +38,7 @@ impl Dialogue {
                     Some(Render::Clear)
                 }
             } else {
-                campaign.progress_next();
+                campaign.progress_next(rng);
                 Some(Render::Clear)
             }
         } else {

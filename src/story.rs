@@ -1,5 +1,8 @@
+use crate::fighter;
+
 pub enum Story {
     Dialogue(&'static [(Decoration, &'static str)]),
+    Battle(fighter::Stats),
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -87,10 +90,19 @@ pub const SCENES: &[Story] = &[
         ),
         (
             Decoration::Phone,
-            "Anyway, I hope that makes sense. Just try not to get knocked out again, okay?",
+            "Anyway, I hope that makes sense. I arranged a sparring match. Just try not to get knocked out again, okay?",
         ),
         (Decoration::Phone, "*BEEP*"),
+        //
+        (Decoration::Chapter, "Different place, different time"),
+        (Decoration::Blank, "Okay, here goes nothing."),
     ]),
-    Story::Dialogue(&[(Decoration::Chapter, "Chapter 3")]),
+    Story::Battle(fighter::Stats {
+        health: 10,
+        energy: 10,
+        recharge: 1,
+        cooldown: 2,
+        abilities: 0b1101,
+    }),
     Story::Dialogue(&[(Decoration::Chapter, "Epilogue")]),
 ];

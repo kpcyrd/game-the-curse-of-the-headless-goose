@@ -1,6 +1,7 @@
 use crate::{
     input,
     machine::{Campaign, Render},
+    random::Rng,
 };
 use arrayvec::ArrayString;
 use core::fmt::Write;
@@ -20,8 +21,9 @@ pub struct Intro {
 }
 
 impl Intro {
-    pub fn update<F: Flash>(
+    pub fn update<R: Rng, F: Flash>(
         &mut self,
+        rng: &mut R,
         campaign: &mut Campaign<F>,
         event: input::Event,
     ) -> Option<Render> {
@@ -48,7 +50,7 @@ impl Intro {
                     match erase {
                         Erase::NewGame => {
                             // Start the game after we removed the discovered save
-                            campaign.start_game();
+                            campaign.start_game(rng);
                             Some(Render::Clear)
                         }
                         Erase::Flash => {
@@ -63,7 +65,7 @@ impl Intro {
         } else {
             match event {
                 input::Event::One => {
-                    campaign.start_game();
+                    campaign.start_game(rng);
                     Some(Render::Clear)
                 }
                 input::Event::Two => {
@@ -71,7 +73,7 @@ impl Intro {
                         self.confirm_erase = Some(Erase::NewGame);
                         Some(Render::Redraw)
                     } else {
-                        campaign.start_game();
+                        campaign.start_game(rng);
                         Some(Render::Clear)
                     }
                 }
