@@ -28,7 +28,7 @@ const DEFAULT_HEALTH: u16 = 10;
 const DEFAULT_ENERGY: u16 = 10;
 const DEFAULT_RECHARGE: u16 = 1;
 const DEFAULT_COOLDOWN: u8 = 4;
-const DEFAULT_ABILITIES: u8 = 5;
+const DEFAULT_ABILITIES: u16 = 0b11111; // First 5 abilities unlocked
 
 /// This holds the state of the higher-order game
 pub struct Campaign<F: Flash> {
@@ -85,7 +85,7 @@ impl<F: Flash> Campaign<F> {
             energy: save.pull_u16(DEFAULT_ENERGY),
             recharge: save.pull_u16(DEFAULT_RECHARGE),
             cooldown: save.pull_u8(DEFAULT_COOLDOWN),
-            abilities: save.pull_u8(DEFAULT_ABILITIES),
+            abilities: save.pull_u16(DEFAULT_ABILITIES),
         };
 
         /*
@@ -131,7 +131,7 @@ impl<F: Flash> Campaign<F> {
         save.push_u16(self.stats.energy);
         save.push_u16(self.stats.recharge);
         save.push_u8(self.stats.cooldown);
-        save.push_u8(self.stats.abilities);
+        save.push_u16(self.stats.abilities);
 
         self.flash.append(save.slice()).unwrap();
     }

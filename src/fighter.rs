@@ -36,7 +36,7 @@ pub struct Stats {
     pub energy: u16,
     pub recharge: u16,
     pub cooldown: u8,
-    pub abilities: u8,
+    pub abilities: u16,
 }
 
 impl Stats {
@@ -72,7 +72,7 @@ impl Fighter {
             max_energy: stats.energy,
             recharge: stats.recharge,
             special: specials::Special::Heal,
-            cooldown: CooldownSet::new(stats.cooldown, stats.abilities as usize),
+            cooldown: CooldownSet::new(stats.cooldown, stats.abilities),
         }
     }
 
@@ -171,15 +171,99 @@ impl Fighter {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::random::FastRandom;
+    use crate::{cooldown::Cooldown, random::FastRandom};
 
     const FIGHTER: Fighter = Fighter::new(Stats {
         health: 10,
         energy: 10,
         recharge: 1,
         cooldown: 1,
-        abilities: 10,
+        abilities: ALL_ABILITIES,
     });
+    const ALL_ABILITIES: u16 = 0b1111111111;
+
+    #[test]
+    fn test_abilities_5() {
+        let fighter = Fighter::new(Stats {
+            health: 10,
+            energy: 10,
+            recharge: 1,
+            cooldown: 1,
+            abilities: 0b11111,
+        });
+
+        assert_eq!(
+            fighter.cooldown,
+            CooldownSet::from([
+                Some(Cooldown::new(1)),
+                Some(Cooldown::new(1)),
+                Some(Cooldown::new(1)),
+                Some(Cooldown::new(1)),
+                Some(Cooldown::new(1)),
+                None,
+                None,
+                None,
+                None,
+                None,
+            ])
+        );
+    }
+
+    #[test]
+    fn test_abilities_all() {
+        let fighter = Fighter::new(Stats {
+            health: 10,
+            energy: 10,
+            recharge: 1,
+            cooldown: 1,
+            abilities: 0b1111111111,
+        });
+
+        assert_eq!(
+            fighter.cooldown,
+            CooldownSet::from([Some(Cooldown::new(1)); 10])
+        );
+    }
+
+    #[test]
+    fn test_abilities_none() {
+        let fighter = Fighter::new(Stats {
+            health: 10,
+            energy: 10,
+            recharge: 1,
+            cooldown: 1,
+            abilities: 0b0,
+        });
+
+        assert_eq!(fighter.cooldown, CooldownSet::from([None; 10]));
+    }
+
+    #[test]
+    fn test_abilities_block_only() {
+        let fighter = Fighter::new(Stats {
+            health: 10,
+            energy: 10,
+            recharge: 1,
+            cooldown: 1,
+            abilities: 0b101000001,
+        });
+
+        assert_eq!(
+            fighter.cooldown,
+            CooldownSet::from([
+                Some(Cooldown::new(1)),
+                None,
+                None,
+                None,
+                None,
+                None,
+                Some(Cooldown::new(1)),
+                None,
+                Some(Cooldown::new(1)),
+                None,
+            ])
+        );
+    }
 
     #[test]
     fn test_fighter_both_fast() {
@@ -203,7 +287,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Three),
+                cooldown: CooldownSet::new(1, ALL_ABILITIES).and_consumed(&Move::Three),
             }
         );
         assert_eq!(
@@ -215,7 +299,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Two),
+                cooldown: CooldownSet::new(1, ALL_ABILITIES).and_consumed(&Move::Two),
             }
         );
     }
@@ -242,7 +326,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Three),
+                cooldown: CooldownSet::new(1, ALL_ABILITIES).and_consumed(&Move::Three),
             }
         );
         assert_eq!(
@@ -254,7 +338,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Six),
+                cooldown: CooldownSet::new(1, ALL_ABILITIES).and_consumed(&Move::Six),
             }
         );
     }
@@ -281,7 +365,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Three),
+                cooldown: CooldownSet::new(1, ALL_ABILITIES).and_consumed(&Move::Three),
             }
         );
         assert_eq!(
@@ -293,7 +377,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Nine),
+                cooldown: CooldownSet::new(1, ALL_ABILITIES).and_consumed(&Move::Nine),
             }
         );
     }
@@ -320,7 +404,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Nine),
+                cooldown: CooldownSet::new(1, ALL_ABILITIES).and_consumed(&Move::Nine),
             }
         );
         assert_eq!(
@@ -332,7 +416,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Four),
+                cooldown: CooldownSet::new(1, ALL_ABILITIES).and_consumed(&Move::Four),
             }
         );
     }
@@ -359,7 +443,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Nine),
+                cooldown: CooldownSet::new(1, ALL_ABILITIES).and_consumed(&Move::Nine),
             }
         );
         assert_eq!(
@@ -371,7 +455,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Six),
+                cooldown: CooldownSet::new(1, ALL_ABILITIES).and_consumed(&Move::Six),
             }
         );
     }
@@ -398,7 +482,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Nine),
+                cooldown: CooldownSet::new(1, ALL_ABILITIES).and_consumed(&Move::Nine),
             }
         );
         assert_eq!(
@@ -410,7 +494,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Three),
+                cooldown: CooldownSet::new(1, ALL_ABILITIES).and_consumed(&Move::Three),
             }
         );
     }
@@ -438,7 +522,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::One),
+                cooldown: CooldownSet::new(1, ALL_ABILITIES).and_consumed(&Move::One),
             }
         );
         assert_eq!(
@@ -450,7 +534,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Six),
+                cooldown: CooldownSet::new(1, ALL_ABILITIES).and_consumed(&Move::Six),
             }
         );
     }
@@ -478,7 +562,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::One),
+                cooldown: CooldownSet::new(1, ALL_ABILITIES).and_consumed(&Move::One),
             }
         );
         assert_eq!(
@@ -490,7 +574,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Three),
+                cooldown: CooldownSet::new(1, ALL_ABILITIES).and_consumed(&Move::Three),
             }
         );
     }
@@ -523,7 +607,7 @@ mod tests {
                 max_energy: 10,
                 recharge: 1,
                 special: Special::Heal,
-                cooldown: CooldownSet::new(1, 10).and_consumed(&Move::Three),
+                cooldown: CooldownSet::new(1, ALL_ABILITIES).and_consumed(&Move::Three),
             }
         );
         assert_eq!(

@@ -76,13 +76,17 @@ impl fmt::Debug for CooldownSet {
 }
 
 impl CooldownSet {
-    pub const fn new(duration: u8, unlocked: usize) -> Self {
+    pub const fn new(duration: u8, mut unlocked: u16) -> Self {
         let mut values = [None; _];
 
         // TODO: current rust can't do for loops in const fn yet
         let mut idx = 0;
-        while unlocked > idx && idx < values.len() {
-            values[idx] = Some(Cooldown::new(duration));
+        while idx < values.len() {
+            if unlocked & 1 == 1 {
+                values[idx] = Some(Cooldown::new(duration));
+            }
+
+            unlocked = unlocked >> 1;
             idx += 1;
         }
 
@@ -140,5 +144,11 @@ impl CooldownSet {
         for cooldown in self.values.iter_mut().flatten() {
             cooldown.increase();
         }
+    }
+}
+
+impl From<[Option<Cooldown>; 10]> for CooldownSet {
+    fn from(values: [Option<Cooldown>; 10]) -> Self {
+        CooldownSet { values }
     }
 }
