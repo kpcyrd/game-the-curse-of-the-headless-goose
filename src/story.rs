@@ -30,16 +30,20 @@ pub const SCENES: &[Story] = &[
         (Decoration::Sloth, "They got you pretty good huh?"),
         (
             Decoration::Sloth,
-            "I'm driving you home, you should recover there.",
+            "Well, welcome to Silly Con Valley downtown!",
         ),
         (
             Decoration::Sloth,
-            "You know ever since I was a small sloth, I always knew I wanted to be a driver.",
+            "Name's Sloth, I'll be driving you home, you should recover there.",
         ),
-        (Decoration::Sloth, "I used to drive for sushi delivery."),
         (
             Decoration::Sloth,
-            "But too many people complained about stale food.",
+            "You know ever since I was a small sloth, I always knew I wanted to move something in this world.",
+        ),
+        (Decoration::Sloth, "Like from A to B."),
+        (
+            Decoration::Sloth,
+            "I used to drive for sushi delivery. But too many people complained about stale food.",
         ),
         (
             Decoration::Sloth,
@@ -53,7 +57,40 @@ pub const SCENES: &[Story] = &[
         (Decoration::Sloth, "heh."),
         (Decoration::Sloth, "Anyway, I digress. We're almost there."),
     ]),
-    Story::Dialogue(&[(Decoration::Chapter, "Chapter 2")]),
+    Story::Dialogue(&[
+        //
+        (Decoration::Chapter, "Same day, later that night"),
+        (Decoration::Phone, "..."),
+        (Decoration::Phone, "*RING RING*"),
+        (Decoration::Phone, "That fight didn't go so well."),
+        (Decoration::Phone, "Maybe I should've actually trained you."),
+        (Decoration::Phone, "*sigh*"),
+        (
+            Decoration::Phone,
+            "Okay look, there's 3 different moves you can pick from. Well technically 4, but..",
+        ),
+        (
+            Decoration::Phone,
+            "Actually, for you.. there's 2 moves to pick from. You can either attack, or you can block.",
+        ),
+        (
+            Decoration::Phone,
+            "You pick a number above zero to attack. You do this amount of damage, but it also costs the same amount of energy.",
+        ),
+        (
+            Decoration::Phone,
+            "You can block attacks with zero, which costs no energy, but also deals no damage. And your opponent can obviously do the same.",
+        ),
+        (
+            Decoration::Phone,
+            "But there's also cooldown, so picking the same number repeatedly won't work out so well. You can still try, but the more cooldown it has, the higher chance it fails.",
+        ),
+        (
+            Decoration::Phone,
+            "Anyway, I hope that makes sense. Just try not to get knocked out again, okay?",
+        ),
+        (Decoration::Phone, "*BEEP*"),
+    ]),
     Story::Dialogue(&[(Decoration::Chapter, "Chapter 3")]),
     Story::Dialogue(&[(Decoration::Chapter, "Epilogue")]),
 ];
