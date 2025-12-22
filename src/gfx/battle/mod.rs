@@ -27,4 +27,8 @@ where
             action::render(display, num, ability);
         }
     }
+
+    if let Some(outcome) = &battle.outcome {
+        gfx::render_bold(display, outcome.message());
+    }
 }

@@ -7,7 +7,7 @@ use embedded_graphics::{
     pixelcolor::{BinaryColor, Rgb666},
     prelude::{Point, Primitive, RgbColor, Size},
     primitives::Rectangle,
-    text::{Alignment, Baseline, Text},
+    text::{Baseline, Text},
 };
 use embedded_graphics_colorcast::Image;
 
@@ -61,14 +61,7 @@ where
 
     // Render some type of decoration (or the text as headline)
     if decoration == Decoration::Chapter {
-        Text::with_alignment(
-            text,
-            display.bounding_box().center(),
-            gfx::CHAPTER_STYLE,
-            Alignment::Center,
-        )
-        .draw(display)
-        .unwrap();
+        gfx::render_bold(display, text);
         return;
     } else if let Some((point, img)) = decoration.image() {
         Image::new(&img, point, Rgb666::WHITE)

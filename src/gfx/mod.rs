@@ -4,14 +4,17 @@ pub mod intro;
 pub mod text;
 
 use arrayvec::ArrayString;
+use core::fmt;
 use embedded_graphics::{
+    Drawable,
     mono_font::{
         MonoFont, MonoTextStyle, MonoTextStyleBuilder,
         ascii::{FONT_7X13, FONT_9X15_BOLD},
     },
     pixelcolor::Rgb666,
-    prelude::{Point, RgbColor},
+    prelude::{DrawTarget, Point, RgbColor},
     primitives::{PrimitiveStyle, PrimitiveStyleBuilder},
+    text::{Alignment, Text},
 };
 
 pub const HEIGHT: u32 = 480;
@@ -47,4 +50,19 @@ pub fn text_fill<const CAP: usize>(buf: &mut ArrayString<CAP>) {
     for _ in 0..buf.remaining_capacity() {
         buf.push(' ');
     }
+}
+
+pub fn render_bold<D: DrawTarget<Color = Rgb666>>(display: &mut D, text: &str)
+where
+    <D as DrawTarget>::Error: fmt::Debug,
+{
+    Text::with_alignment(
+        text,
+        display.bounding_box().center(),
+        CHAPTER_STYLE,
+        Alignment::Center,
+    )
+    .draw(display)
+    .unwrap();
+    return;
 }

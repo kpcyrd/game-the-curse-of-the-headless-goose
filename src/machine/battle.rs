@@ -7,19 +7,53 @@ use crate::{
 };
 use embedded_savegame::storage::Flash;
 
+pub enum Outcome {
+    Win,
+    Lose,
+}
+
+impl Outcome {
+    pub fn message(&self) -> &'static str {
+        match self {
+            Outcome::Win => "They have been defeated! You win!",
+            Outcome::Lose => "We have been defeated!",
+        }
+    }
+}
+
 pub struct Battle {
     pub player: Fighter,
     pub enemy: Fighter,
     pub their_move: Move,
+    pub outcome: Option<Outcome>,
 }
 
 impl Battle {
     pub fn update<R: Rng, F: Flash>(
         &mut self,
         rng: &mut R,
-        _campaign: &mut Campaign<F>,
+        campaign: &mut Campaign<F>,
         event: input::Event,
     ) -> Option<Render> {
+        // Check if the battle is already over
+        if let Some(outcome) = &self.outcome {
+            if event == input::Event::Hash {
+                match outcome {
+                    Outcome::Win => {
+                        // Do nothing for now
+                        campaign.progress_next(rng);
+                    }
+                    Outcome::Lose => {
+                        // Restart the fight
+                        // TODO: maybe offer more options here
+                        campaign.pick_scene(rng);
+                    }
+                }
+            }
+            return None;
+        }
+
+        // Check if the move is valid
         let mv = Move::from_input(event)?;
 
         // Ensure the move is unlocked
@@ -34,12 +68,12 @@ impl Battle {
         );
 
         if self.player.defeated() {
-            // println!("We have been defeated! Game over.");
-            // TODO
+            // We have been defeated! Game over.
+            self.outcome = Some(Outcome::Lose);
             return Some(Render::Redraw);
         } else if self.enemy.defeated() {
-            // println!("They have been defeated! You win!");
-            // TODO
+            // They have been defeated! You win!
+            self.outcome = Some(Outcome::Win);
             return Some(Render::Redraw);
         }
 
