@@ -1,5 +1,5 @@
 use crate::{
-    action::{Decision, Move},
+    action::{self, Decision, Move},
     cooldown::CooldownSet,
     random::Rng,
     specials::{self, Special},
@@ -192,7 +192,10 @@ impl Fighter {
             && their_mv.blocks(mv)
         {
             info!("Blocked!");
-            turn.push(source, Step::AttackFailed(*mv));
+            if !action::both_defense(mv, their_mv) {
+                // If both are blocking, it looks weird to say "attack failed"
+                turn.push(source, Step::AttackFailed(*mv));
+            }
             turn.queue_cooldown(source, *mv);
             return;
         }

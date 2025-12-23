@@ -118,3 +118,7 @@ impl std::str::FromStr for Move {
         Ok(Move::from(value))
     }
 }
+
+pub fn both_defense(mv1: &Move, mv2: &Move) -> bool {
+    mv1.to_decision() == Decision::Block && mv2.to_decision() == Decision::Block
+}
