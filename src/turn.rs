@@ -4,6 +4,7 @@ use crate::{
     gfx::{self, glide},
 };
 use arrayvec::ArrayVec;
+use core::fmt;
 use embedded_graphics::{mono_font::MonoTextStyle, pixelcolor::Rgb666, prelude::Point};
 
 // TODO: this is a random number for now
@@ -90,6 +91,21 @@ pub enum Step {
     RollFailed,
 }
 
+impl fmt::Display for Step {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Step::TakeDamage(mv) => write!(f, "DAMAGE +{}", mv.damage()),
+            Step::AttackFailed(_) => write!(f, "MISS"),
+            // This isn't really displayed anywhere
+            Step::SpendEnergy(mv) => write!(f, "ENERGY -{}", mv.damage()),
+            Step::RechargeHealth(amount) => write!(f, "HEALTH +{}", amount),
+            Step::RechargeEnergy(amount) => write!(f, "ENERGY +{}", amount),
+            Step::RollSuccess => write!(f, "ROLL SUCCESS"),
+            Step::RollFailed => write!(f, "ROLL FAILED"),
+        }
+    }
+}
+
 impl Step {
     pub fn apply(&self, fighter: &mut Fighter) {
         match self {
@@ -122,18 +138,5 @@ impl Step {
             Self::RollFailed => gfx::RED_TEXT,
         };
         Some(style)
-    }
-
-    // TODO: this is temporary, we also want to include amounts
-    pub const fn to_str(&self) -> &'static str {
-        match self {
-            Self::TakeDamage(_) => "took damage!",
-            Self::AttackFailed(_) => "attack failed!",
-            Self::SpendEnergy(_) => "spent energy!",
-            Self::RechargeHealth(_) => "recharged health!",
-            Self::RechargeEnergy(_) => "recharged energy!",
-            Self::RollSuccess => "roll succeeded!",
-            Self::RollFailed => "roll failed!",
-        }
     }
 }

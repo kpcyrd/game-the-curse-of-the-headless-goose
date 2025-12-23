@@ -1,12 +1,16 @@
 use crate::gfx;
+use arrayvec::ArrayString;
 use embedded_graphics::{
     Drawable,
     mono_font::MonoTextStyle,
     pixelcolor::Rgb666,
-    prelude::{Dimensions, DrawTarget, Point, Size, Transform},
+    prelude::{Dimensions, DrawTarget, Point, Size},
     primitives::{Rectangle, StyledDrawable},
     text::Text,
 };
+
+// The buffer size for the activity glider text
+const GLIDER_WIDTH: usize = 13;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Direction {
@@ -27,8 +31,11 @@ impl Direction {
     }
 }
 
-pub struct Glider<T> {
-    primitive: T,
+pub struct Glider {
+    buf: ArrayString<GLIDER_WIDTH>,
+    point: Point,
+    style: MonoTextStyle<'static, Rgb666>,
+
     direction: Direction,
     distance: u32,
     increment: i32,
@@ -36,10 +43,22 @@ pub struct Glider<T> {
     clear_all: bool,
 }
 
-impl<T: Transform> Glider<T> {
-    pub const fn new(primitive: T, direction: Direction, distance: u32) -> Self {
+impl Glider {
+    pub const fn buf() -> ArrayString<GLIDER_WIDTH> {
+        ArrayString::new_const()
+    }
+
+    pub const fn new(
+        buf: ArrayString<GLIDER_WIDTH>,
+        point: Point,
+        style: MonoTextStyle<'static, Rgb666>,
+        direction: Direction,
+        distance: u32,
+    ) -> Self {
         Self {
-            primitive,
+            buf,
+            point,
+            style,
             direction,
             distance,
             increment: 1,
@@ -61,7 +80,7 @@ impl<T: Transform> Glider<T> {
         let increment = self.increment.min(self.distance as i32);
 
         let delta = self.direction.to_delta(increment);
-        self.primitive = self.primitive.translate(delta);
+        self.point += delta;
 
         self.clear_previous = true;
         self.distance = self.distance.saturating_sub(increment.unsigned_abs());
@@ -70,15 +89,16 @@ impl<T: Transform> Glider<T> {
     }
 }
 
-impl<T: Drawable<Color = Rgb666> + Dimensions> Drawable for Glider<T> {
-    type Color = T::Color;
+impl Drawable for Glider {
+    type Color = Rgb666;
     type Output = ();
 
     fn draw<D>(&self, target: &mut D) -> Result<Self::Output, D::Error>
     where
         D: DrawTarget<Color = Self::Color>,
     {
-        let dimensions = self.primitive.bounding_box();
+        let primitive = Text::new(&self.buf, self.point, self.style);
+        let dimensions = primitive.bounding_box();
 
         if self.clear_all {
             Rectangle::new(
@@ -90,7 +110,7 @@ impl<T: Drawable<Color = Rgb666> + Dimensions> Drawable for Glider<T> {
             )
             .draw_styled(&gfx::BLACK_STYLE, target)?;
         } else {
-            self.primitive.draw(target)?;
+            primitive.draw(target)?;
         }
 
         if self.clear_previous {
@@ -102,26 +122,11 @@ impl<T: Drawable<Color = Rgb666> + Dimensions> Drawable for Glider<T> {
 
             Rectangle::new(
                 point,
-                Size::new(
-                    self.primitive.bounding_box().size.width,
-                    self.increment as u32,
-                ),
+                Size::new(dimensions.size.width, self.increment as u32),
             )
             .draw_styled(&gfx::BLACK_STYLE, target)?;
         }
 
         Ok(())
-    }
-}
-
-pub type TextGlider = Glider<Text<'static, MonoTextStyle<'static, Rgb666>>>;
-
-impl TextGlider {
-    pub const fn empty_text() -> Self {
-        Glider::new(
-            Text::new("", Point::zero(), gfx::TEXT_STYLE),
-            Direction::Down,
-            0,
-        )
     }
 }

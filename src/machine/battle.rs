@@ -1,18 +1,14 @@
 use crate::{
     action::Move,
     fighter::{self, Fighter},
-    gfx::{
-        self,
-        glide::{Glider, TextGlider},
-    },
+    gfx::{self, glide::Glider},
     input,
     machine::{Campaign, Render},
     random::Rng,
     timer::Timer,
     turn::{self, Turn},
 };
-use core::cmp;
-use embedded_graphics::text::Text;
+use core::{cmp, fmt::Write};
 use embedded_savegame::storage::Flash;
 
 const TURN_STEP_DELAY: u8 = 1;
@@ -37,7 +33,7 @@ pub struct Battle {
     pub their_move: Move,
     pub turn: Option<Turn>,
     pub outcome: Option<Outcome>,
-    pub glider: Option<TextGlider>,
+    pub glider: Option<Glider>,
     pub timer: Timer,
 }
 
@@ -138,8 +134,13 @@ impl Battle {
 
             // Setup some animation
             if let Some(style) = step.to_style() {
+                let mut buf = Glider::buf();
+                write!(&mut buf, "{step}").unwrap();
+
                 self.glider = Some(Glider::new(
-                    Text::new(step.to_str(), source.to_point(), style),
+                    buf,
+                    source.to_point(),
+                    style,
                     source.to_glide_direction(),
                     gfx::battle::GLIDE_DISTANCE,
                 ));
