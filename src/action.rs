@@ -32,7 +32,7 @@ impl Decision {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Move {
     Zero,
     One,

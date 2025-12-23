@@ -123,6 +123,7 @@ impl<F: Flash> Campaign<F> {
                             player: Fighter::new(self.stats),
                             enemy,
                             their_move,
+                            turn: None,
                             outcome: None,
                         })
                     }

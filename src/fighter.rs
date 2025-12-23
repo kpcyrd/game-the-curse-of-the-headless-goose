@@ -3,31 +3,68 @@ use crate::{
     cooldown::CooldownSet,
     random::Rng,
     specials::{self, Special},
+    turn::{self, Step, Turn},
 };
 use log::{debug, info};
 
 pub fn turn<R: Rng>(
     rng: &mut R,
-    us: &mut Fighter,
-    them: &mut Fighter,
+    mut player: Fighter,
+    mut enemy: Fighter,
     mut our_move: Option<&Move>,
     mut their_move: Option<&Move>,
-) {
+) -> Turn {
+    let mut turn = Turn::new();
+
     // Apply cooldown checks and rolls
     info!("Their turn (early)");
-    them.roll_cooldown_check(rng, &mut their_move);
+    enemy.roll_cooldown_check(rng, &mut turn, turn::Source::Enemy, &mut their_move);
     info!("Our turn (early)");
-    us.roll_cooldown_check(rng, &mut our_move);
+    player.roll_cooldown_check(rng, &mut turn, turn::Source::Player, &mut our_move);
 
     // Apply moves
     info!("Their turn");
-    them.execute(us, their_move, our_move);
-    if us.defeated() {
+    enemy.execute(
+        &mut turn,
+        turn::Source::Enemy,
+        &mut player,
+        their_move,
+        our_move,
+    );
+    if player.defeated() {
         // If we were defeated, end the round early
-        return;
+        return turn;
     }
     info!("Our turn");
-    us.execute(them, our_move, their_move);
+    player.execute(
+        &mut turn,
+        turn::Source::Player,
+        &mut enemy,
+        our_move,
+        their_move,
+    );
+
+    // Done
+    turn
+}
+
+// This function is likely only going to be used in unit tests
+pub fn apply_turn<R: Rng>(
+    rng: &mut R,
+    player: &mut Fighter,
+    enemy: &mut Fighter,
+    our_move: Option<&Move>,
+    their_move: Option<&Move>,
+) {
+    let mut turn = turn(rng, player.clone(), enemy.clone(), our_move, their_move);
+
+    while let Some((source, step)) = turn.next_step() {
+        let fighter = match source {
+            turn::Source::Player => &mut *player,
+            turn::Source::Enemy => &mut *enemy,
+        };
+        step.apply(fighter);
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -41,6 +78,7 @@ pub struct Stats {
 
 impl Stats {
     // This doesn't make much sense, but let's us notice if we don't initialize properly
+    // Allows us to make Campaign::new() const fn
     pub const fn zero() -> Self {
         Self {
             health: 0,
@@ -97,13 +135,45 @@ impl Fighter {
         }
     }
 
-    pub fn roll_cooldown_check<R: Rng>(&mut self, rng: &mut R, mv: &mut Option<&Move>) {
-        if mv.take_if(|mv| !self.cooldown.attempt(rng, mv)).is_some() {
-            debug!("Move is on cooldown, cannot execute!");
+    pub fn roll_cooldown_check<R: Rng>(
+        &mut self,
+        rng: &mut R,
+        turn: &mut Turn,
+        source: turn::Source,
+        mv: &mut Option<&Move>,
+    ) {
+        let Some(cooldown) = mv.map(|mv| self.cooldown.get_mut(mv)).flatten() else {
+            // Move is not available, discard
+            // We don't record this as turn event because this illegal move should never happen
+            *mv = None;
+            return;
+        };
+
+        if cooldown.full() {
+            // Everything is fine, no roll needed
+            return;
         }
+
+        let step = if cooldown.attempt(rng) {
+            // Cooldown roll succeeded
+            Step::RollSuccess
+        } else {
+            // Cooldown roll failed
+            debug!("Move is on cooldown, cannot execute!");
+            *mv = None;
+            Step::RollFailed
+        };
+        turn.push(source, step);
     }
 
-    pub fn execute(&mut self, other: &mut Self, mv: Option<&Move>, their_mv: Option<&Move>) {
+    pub fn execute(
+        &mut self,
+        turn: &mut Turn,
+        source: turn::Source,
+        other: &mut Self,
+        mv: Option<&Move>,
+        their_mv: Option<&Move>,
+    ) {
         let Some(mv) = mv else {
             return;
         };
@@ -112,6 +182,7 @@ impl Fighter {
         if !self.drain_energy(mv) {
             return;
         }
+        turn.push(source, Step::SpendEnergy(*mv));
 
         // Check if it goes through
         if let Some(their_mv) = their_mv
@@ -119,18 +190,23 @@ impl Fighter {
             && their_mv.blocks(mv)
         {
             info!("Blocked!");
+            turn.push(source, Step::AttackFailed(*mv));
+            turn.push(source, Step::SetCooldown(*mv));
             return;
         }
 
         if mv.damage() > 0 {
             info!("Applying damage!");
+            turn.push(source.other(), Step::TakeDamage(*mv));
             other.apply_damage(mv);
         }
 
         if mv.to_decision() == Decision::Special {
             let special = self.special;
-            special.apply(self);
+            special.apply(turn, source, self);
         }
+
+        turn.push(source, Step::SetCooldown(*mv));
     }
 
     pub const fn apply_damage(&mut self, mv: &Move) {
@@ -270,7 +346,7 @@ mod tests {
         let mut fighter = FIGHTER.clone();
         let mut other = FIGHTER.clone();
         let mut rng = FastRandom::new();
-        turn(
+        apply_turn(
             &mut rng,
             &mut fighter,
             &mut other,
@@ -309,7 +385,7 @@ mod tests {
         let mut fighter = FIGHTER.clone();
         let mut other = FIGHTER.clone();
         let mut rng = FastRandom::new();
-        turn(
+        apply_turn(
             &mut rng,
             &mut fighter,
             &mut other,
@@ -348,7 +424,7 @@ mod tests {
         let mut fighter = FIGHTER.clone();
         let mut other = FIGHTER.clone();
         let mut rng = FastRandom::new();
-        turn(
+        apply_turn(
             &mut rng,
             &mut fighter,
             &mut other,
@@ -387,7 +463,7 @@ mod tests {
         let mut fighter = FIGHTER.clone();
         let mut other = FIGHTER.clone();
         let mut rng = FastRandom::new();
-        turn(
+        apply_turn(
             &mut rng,
             &mut fighter,
             &mut other,
@@ -426,7 +502,7 @@ mod tests {
         let mut fighter = FIGHTER.clone();
         let mut other = FIGHTER.clone();
         let mut rng = FastRandom::new();
-        turn(
+        apply_turn(
             &mut rng,
             &mut fighter,
             &mut other,
@@ -465,7 +541,7 @@ mod tests {
         let mut fighter = FIGHTER.clone();
         let mut other = FIGHTER.clone();
         let mut rng = FastRandom::new();
-        turn(
+        apply_turn(
             &mut rng,
             &mut fighter,
             &mut other,
@@ -506,7 +582,7 @@ mod tests {
         fighter.energy = 5;
         let mut other = FIGHTER.clone();
         let mut rng = FastRandom::new();
-        turn(
+        apply_turn(
             &mut rng,
             &mut fighter,
             &mut other,
@@ -546,7 +622,7 @@ mod tests {
         fighter.energy = 5;
         let mut other = FIGHTER.clone();
         let mut rng = FastRandom::new();
-        turn(
+        apply_turn(
             &mut rng,
             &mut fighter,
             &mut other,
@@ -590,7 +666,7 @@ mod tests {
         let cd = other.cooldown.clone();
 
         let mut rng = FastRandom::new();
-        turn(
+        apply_turn(
             &mut rng,
             &mut fighter,
             &mut other,

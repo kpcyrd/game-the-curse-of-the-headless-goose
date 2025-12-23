@@ -56,7 +56,7 @@ pub fn main() -> anyhow::Result<()> {
 
         println!("Our move: {:?} ({:?})", our_move, our_move.to_decision());
 
-        fighter::turn(
+        fighter::apply_turn(
             &mut rng,
             &mut us,
             &mut them,

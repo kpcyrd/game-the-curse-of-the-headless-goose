@@ -4,6 +4,7 @@ use crate::{
     input,
     machine::{Campaign, Render},
     random::Rng,
+    turn::Turn,
 };
 use embedded_savegame::storage::Flash;
 
@@ -25,6 +26,7 @@ pub struct Battle {
     pub player: Fighter,
     pub enemy: Fighter,
     pub their_move: Move,
+    pub turn: Option<Turn>,
     pub outcome: Option<Outcome>,
 }
 
@@ -59,7 +61,7 @@ impl Battle {
         // Ensure the move is unlocked
         self.player.cooldown.get(&mv)?;
 
-        fighter::turn(
+        fighter::apply_turn(
             rng,
             &mut self.player,
             &mut self.enemy,

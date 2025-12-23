@@ -136,8 +136,10 @@ impl CooldownSet {
         slot.as_mut()
     }
 
-    pub fn attempt<R: Rng>(&mut self, rng: &mut R, mv: &Move) -> bool {
-        self.get_mut(mv).is_some_and(|cool| cool.attempt(rng))
+    pub const fn consume(&mut self, mv: &Move) {
+        if let Some(cooldown) = self.get_mut(mv) {
+            cooldown.consume();
+        }
     }
 
     pub fn increase(&mut self) {

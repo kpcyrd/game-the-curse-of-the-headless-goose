@@ -1,9 +1,13 @@
 pub mod heal;
 
-use crate::{fighter::Fighter, specials::heal::Heal};
+use crate::{
+    fighter::Fighter,
+    specials::heal::Heal,
+    turn::{self, Turn},
+};
 
 trait SpecialAbility {
-    fn apply(us: &mut Fighter);
+    fn apply(turn: &mut Turn, source: turn::Source, us: &mut Fighter);
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -12,9 +16,9 @@ pub enum Special {
 }
 
 impl Special {
-    pub fn apply(&self, us: &mut Fighter) {
+    pub fn apply(&self, turn: &mut Turn, source: turn::Source, us: &mut Fighter) {
         match self {
-            Special::Heal => Heal::apply(us),
+            Special::Heal => Heal::apply(turn, source, us),
         }
     }
 }
