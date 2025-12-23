@@ -65,6 +65,8 @@ pub fn apply_turn<R: Rng>(
         };
         step.apply(fighter);
     }
+
+    turn.apply_cooldown(player, enemy);
 }
 
 #[derive(Clone, Copy)]
@@ -191,7 +193,7 @@ impl Fighter {
         {
             info!("Blocked!");
             turn.push(source, Step::AttackFailed(*mv));
-            turn.push(source, Step::SetCooldown(*mv));
+            turn.queue_cooldown(source, *mv);
             return;
         }
 
@@ -206,7 +208,7 @@ impl Fighter {
             special.apply(turn, source, self);
         }
 
-        turn.push(source, Step::SetCooldown(*mv));
+        turn.queue_cooldown(source, *mv);
     }
 
     pub const fn apply_damage(&mut self, mv: &Move) {

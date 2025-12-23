@@ -13,6 +13,8 @@ const MAX_STEPS: usize = 32;
 pub struct Turn {
     array: ArrayVec<(Source, Step), MAX_STEPS>,
     current: usize,
+    player_cooldown: Option<Move>,
+    enemy_cooldown: Option<Move>,
 }
 
 impl Turn {
@@ -29,6 +31,22 @@ impl Turn {
         let item = self.array.get(self.current);
         self.current = self.current.saturating_add(1);
         item
+    }
+
+    pub fn queue_cooldown(&mut self, source: Source, mv: Move) {
+        match source {
+            Source::Player => self.player_cooldown = Some(mv),
+            Source::Enemy => self.enemy_cooldown = Some(mv),
+        }
+    }
+
+    pub fn apply_cooldown(&self, player: &mut Fighter, enemy: &mut Fighter) {
+        if let Some(mv) = self.player_cooldown {
+            player.cooldown.consume(&mv);
+        }
+        if let Some(mv) = self.enemy_cooldown {
+            enemy.cooldown.consume(&mv);
+        }
     }
 }
 
@@ -66,7 +84,6 @@ pub enum Step {
     TakeDamage(Move),
     AttackFailed(Move),
     SpendEnergy(Move),
-    SetCooldown(Move),
     RechargeHealth(u16),
     RechargeEnergy(u16),
     RollSuccess,
@@ -82,9 +99,6 @@ impl Step {
             Step::AttackFailed(_amount) => {}
             Step::SpendEnergy(mv) => {
                 fighter.drain_energy(mv);
-            }
-            Step::SetCooldown(mv) => {
-                fighter.cooldown.consume(mv);
             }
             Step::RechargeHealth(amount) => {
                 fighter.recharge_health(*amount);
@@ -102,7 +116,6 @@ impl Step {
             Self::TakeDamage(_) => gfx::RED_TEXT,
             Self::AttackFailed(_) => gfx::RED_TEXT,
             Self::SpendEnergy(_) => return None,
-            Self::SetCooldown(_) => return None,
             Self::RechargeHealth(_) => gfx::GREEN_TEXT,
             Self::RechargeEnergy(_) => gfx::GREEN_TEXT,
             Self::RollSuccess => gfx::GREEN_TEXT,
@@ -117,7 +130,6 @@ impl Step {
             Self::TakeDamage(_) => "took damage!",
             Self::AttackFailed(_) => "attack failed!",
             Self::SpendEnergy(_) => "spent energy!",
-            Self::SetCooldown(_) => "set cooldown!",
             Self::RechargeHealth(_) => "recharged health!",
             Self::RechargeEnergy(_) => "recharged energy!",
             Self::RollSuccess => "roll succeeded!",

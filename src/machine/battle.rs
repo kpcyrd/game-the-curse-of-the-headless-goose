@@ -147,6 +147,9 @@ impl Battle {
             }
         } else {
             // Prepare next turn
+            if let Some(turn) = &self.turn {
+                turn.apply_cooldown(&mut self.player, &mut self.enemy);
+            }
 
             // Recharge energy for both fighters
             for fighter in [&mut self.player, &mut self.enemy] {
