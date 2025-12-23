@@ -12,7 +12,7 @@ use embedded_graphics::{
         ascii::{FONT_7X13, FONT_9X15_BOLD},
     },
     pixelcolor::Rgb666,
-    prelude::{DrawTarget, Point, RgbColor},
+    prelude::{DrawTarget, Point, RgbColor, WebColors},
     primitives::{PrimitiveStyle, PrimitiveStyleBuilder},
     text::{Alignment, Text},
 };
@@ -33,9 +33,22 @@ pub const CHAPTER_STYLE: MonoTextStyle<Rgb666> = MonoTextStyleBuilder::new()
     .background_color(Rgb666::BLACK)
     .build();
 
+pub const GREEN_TEXT: MonoTextStyle<Rgb666> = MonoTextStyleBuilder::new()
+    .font(FONT)
+    .text_color(Rgb666::new(0, 50, 0))
+    .background_color(Rgb666::BLACK)
+    .build();
+
+pub const RED_TEXT: MonoTextStyle<Rgb666> = MonoTextStyleBuilder::new()
+    .font(FONT)
+    .text_color(Rgb666::CSS_RED)
+    .background_color(Rgb666::BLACK)
+    .build();
+
 const BLACK_STYLE: PrimitiveStyle<Rgb666> = PrimitiveStyleBuilder::new()
     .fill_color(Rgb666::BLACK)
     .build();
+
 /*
 const WHITE_STYLE: PrimitiveStyle<Rgb666> = PrimitiveStyleBuilder::new()
     .fill_color(Rgb666::WHITE)

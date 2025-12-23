@@ -15,6 +15,8 @@ const CAP: usize = "Strong: Seven (99%) ".len();
 const CHAR_WIDTH: i32 = gfx::TEXT_STYLE.font.character_size.width as i32;
 const CHAR_HEIGHT: i32 = gfx::TEXT_STYLE.font.character_size.height as i32;
 
+pub const STATS_WIDTH: i32 = CAP as i32 * CHAR_WIDTH;
+
 pub fn render<D: DrawTarget<Color = Rgb666>>(
     display: &mut D,
     point: Point,
@@ -23,11 +25,6 @@ pub fn render<D: DrawTarget<Color = Rgb666>>(
 ) where
     <D as DrawTarget>::Error: fmt::Debug,
 {
-    let point = Point::new(
-        point.x.min(gfx::WIDTH as i32 - CAP as i32 * CHAR_WIDTH),
-        point.y,
-    );
-
     let mut text = ArrayString::<CAP>::new_const();
     for (i, (label, value)) in [("Health", fighter.health), ("Energy", fighter.energy)]
         .iter()

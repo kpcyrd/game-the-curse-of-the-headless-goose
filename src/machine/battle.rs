@@ -58,6 +58,11 @@ impl Battle {
         campaign: &mut Campaign<F>,
         event: input::Event,
     ) -> Option<Render> {
+        // TODO: This allows me to iterate faster, remove later
+        if event == input::Event::Star {
+            panic!("Fastline into usb mode");
+        }
+
         // Check if the battle is already over
         if let Some(outcome) = &self.outcome {
             if event == input::Event::Hash {
