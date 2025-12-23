@@ -1,5 +1,10 @@
-use crate::{action::Move, fighter::Fighter};
+use crate::{
+    action::Move,
+    fighter::Fighter,
+    gfx::{self, glide},
+};
 use arrayvec::ArrayVec;
+use embedded_graphics::{mono_font::MonoTextStyle, pixelcolor::Rgb666, prelude::Point};
 
 // TODO: this is a random number for now
 const MAX_STEPS: usize = 32;
@@ -40,6 +45,20 @@ impl Source {
             Source::Enemy => Source::Player,
         }
     }
+
+    pub const fn to_point(&self) -> Point {
+        match self {
+            Source::Player => gfx::battle::PLAYER_ACTIVITY_POINT,
+            Source::Enemy => gfx::battle::ENEMY_ACTIVITY_POINT,
+        }
+    }
+
+    pub const fn to_glide_direction(&self) -> glide::Direction {
+        match self {
+            Source::Player => glide::Direction::Up,
+            Source::Enemy => glide::Direction::Down,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -75,6 +94,34 @@ impl Step {
             }
             Step::RollSuccess => {}
             Step::RollFailed => {}
+        }
+    }
+
+    pub const fn to_style(&self) -> Option<MonoTextStyle<'static, Rgb666>> {
+        let style = match self {
+            Self::TakeDamage(_) => gfx::RED_TEXT,
+            Self::AttackFailed(_) => gfx::RED_TEXT,
+            Self::SpendEnergy(_) => return None,
+            Self::SetCooldown(_) => return None,
+            Self::RechargeHealth(_) => gfx::GREEN_TEXT,
+            Self::RechargeEnergy(_) => gfx::GREEN_TEXT,
+            Self::RollSuccess => gfx::GREEN_TEXT,
+            Self::RollFailed => gfx::RED_TEXT,
+        };
+        Some(style)
+    }
+
+    // TODO: this is temporary, we also want to include amounts
+    pub const fn to_str(&self) -> &'static str {
+        match self {
+            Self::TakeDamage(_) => "took damage!",
+            Self::AttackFailed(_) => "attack failed!",
+            Self::SpendEnergy(_) => "spent energy!",
+            Self::SetCooldown(_) => "set cooldown!",
+            Self::RechargeHealth(_) => "recharged health!",
+            Self::RechargeEnergy(_) => "recharged energy!",
+            Self::RollSuccess => "roll succeeded!",
+            Self::RollFailed => "roll failed!",
         }
     }
 }

@@ -1,6 +1,10 @@
 use crate::{
     action::Move,
     fighter::{self, Fighter},
+    gfx::{
+        self,
+        glide::{Glider, TextGlider},
+    },
     input,
     machine::{Campaign, Render},
     random::Rng,
@@ -8,9 +12,10 @@ use crate::{
     turn::{self, Turn},
 };
 use core::cmp;
+use embedded_graphics::text::Text;
 use embedded_savegame::storage::Flash;
 
-const TURN_STEP_DELAY: u8 = u8::MAX;
+const TURN_STEP_DELAY: u8 = 1;
 
 pub enum Outcome {
     Win,
@@ -31,8 +36,8 @@ pub struct Battle {
     pub enemy: Fighter,
     pub their_move: Move,
     pub turn: Option<Turn>,
-    pub upcoming_step: Option<(turn::Source, turn::Step)>,
     pub outcome: Option<Outcome>,
+    pub glider: Option<TextGlider>,
     pub timer: Timer,
 }
 
@@ -46,8 +51,8 @@ impl Battle {
             enemy,
             their_move,
             turn: None,
-            upcoming_step: None,
             outcome: None,
+            glider: None,
             timer: Timer::new(TURN_STEP_DELAY),
         }
     }
@@ -108,19 +113,38 @@ impl Battle {
 
         // Check timer
         if !self.timer.step() {
+            // We do this just to slow down the timer
+            *render = cmp::max(*render, Some(Render::Redraw));
             return;
         }
 
-        // Execute the upcoming step we've render for a moment
-        if let Some((source, step)) = self.upcoming_step.take() {
+        if let Some(glider) = &mut self.glider {
+            glider.step();
+            if glider.finished() {
+                self.glider = None;
+            } else {
+                *render = cmp::max(*render, Some(Render::Redraw));
+                return;
+            }
+        }
+
+        // Execute the next step and start an animation if needed
+        if let Some((source, step)) = turn.next_step() {
+            // Apply the step
             let fighter = match source {
                 turn::Source::Player => &mut self.player,
                 turn::Source::Enemy => &mut self.enemy,
             };
             step.apply(fighter);
-        } else if let Some((source, step)) = turn.next_step() {
-            // Select the next step for rendering
-            self.upcoming_step = Some((*source, *step));
+
+            // Setup some animation
+            if let Some(style) = step.to_style() {
+                self.glider = Some(Glider::new(
+                    Text::new(step.to_str(), source.to_point(), style),
+                    source.to_glide_direction(),
+                    gfx::battle::GLIDE_DISTANCE,
+                ));
+            }
         } else {
             // Prepare next turn
 
