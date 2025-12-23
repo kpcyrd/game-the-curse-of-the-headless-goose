@@ -64,5 +64,4 @@ where
     )
     .draw(display)
     .unwrap();
-    return;
 }

@@ -15,7 +15,7 @@ pub fn main() -> anyhow::Result<()> {
     let stdin = io::stdin();
     let mut lines = stdin.lines();
 
-    let mut us = Fighter::new(fighter::Stats {
+    let mut us = Fighter::new(&fighter::Stats {
         health: 10,
         energy: 10,
         recharge: 1,
@@ -23,7 +23,7 @@ pub fn main() -> anyhow::Result<()> {
         abilities: 5,
     });
 
-    let mut them = Fighter::new(fighter::Stats {
+    let mut them = Fighter::new(&fighter::Stats {
         health: 30,
         energy: 10,
         recharge: 1,

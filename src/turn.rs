@@ -42,6 +42,7 @@ impl Source {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Step {
     TakeDamage(Move),
     AttackFailed(Move),
@@ -57,7 +58,7 @@ impl Step {
     pub fn apply(&self, fighter: &mut Fighter) {
         match self {
             Step::TakeDamage(mv) => {
-                fighter.apply_damage(&mv);
+                fighter.apply_damage(mv);
             }
             Step::AttackFailed(_amount) => {}
             Step::SpendEnergy(mv) => {

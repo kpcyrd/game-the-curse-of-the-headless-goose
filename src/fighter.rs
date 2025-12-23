@@ -48,7 +48,7 @@ pub fn turn<R: Rng>(
     turn
 }
 
-// This function is likely only going to be used in unit tests
+// This function is only used in unit tests and the cli
 pub fn apply_turn<R: Rng>(
     rng: &mut R,
     player: &mut Fighter,
@@ -102,7 +102,7 @@ pub struct Fighter {
 }
 
 impl Fighter {
-    pub const fn new(stats: Stats) -> Self {
+    pub const fn new(stats: &Stats) -> Self {
         Self {
             health: stats.health,
             max_health: stats.health,
@@ -249,7 +249,7 @@ mod tests {
     use super::*;
     use crate::{cooldown::Cooldown, random::FastRandom};
 
-    const FIGHTER: Fighter = Fighter::new(Stats {
+    const FIGHTER: Fighter = Fighter::new(&Stats {
         health: 10,
         energy: 10,
         recharge: 1,
@@ -260,7 +260,7 @@ mod tests {
 
     #[test]
     fn test_abilities_5() {
-        let fighter = Fighter::new(Stats {
+        let fighter = Fighter::new(&Stats {
             health: 10,
             energy: 10,
             recharge: 1,
@@ -287,7 +287,7 @@ mod tests {
 
     #[test]
     fn test_abilities_all() {
-        let fighter = Fighter::new(Stats {
+        let fighter = Fighter::new(&Stats {
             health: 10,
             energy: 10,
             recharge: 1,
@@ -303,7 +303,7 @@ mod tests {
 
     #[test]
     fn test_abilities_none() {
-        let fighter = Fighter::new(Stats {
+        let fighter = Fighter::new(&Stats {
             health: 10,
             energy: 10,
             recharge: 1,
@@ -316,7 +316,7 @@ mod tests {
 
     #[test]
     fn test_abilities_block_only() {
-        let fighter = Fighter::new(Stats {
+        let fighter = Fighter::new(&Stats {
             health: 10,
             energy: 10,
             recharge: 1,

@@ -3,8 +3,7 @@ pub mod dialogue;
 pub mod intro;
 
 use crate::{
-    fighter::{self, Fighter},
-    input,
+    fighter, input,
     machine::{battle::Battle, dialogue::Dialogue, intro::Intro},
     random::Rng,
     save::Save,
@@ -12,10 +11,10 @@ use crate::{
 };
 use embedded_savegame::storage::{Flash, Storage};
 
-#[derive(PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Render {
-    Clear,
     Redraw,
+    Clear,
 }
 
 const SLOT_SIZE: usize = 64;
@@ -116,16 +115,7 @@ impl<F: Flash> Campaign<F> {
                 match scene {
                     story::Story::Dialogue(text) => Scene::Dialogue(Dialogue::new(text)),
                     story::Story::Battle(enemy) => {
-                        let enemy = Fighter::new(*enemy);
-                        let their_move = enemy.random_move(rng);
-
-                        Scene::Battle(Battle {
-                            player: Fighter::new(self.stats),
-                            enemy,
-                            their_move,
-                            turn: None,
-                            outcome: None,
-                        })
+                        Scene::Battle(Battle::new(rng, &self.stats, enemy))
                     }
                 }
             } else {
@@ -156,6 +146,7 @@ impl<F: Flash> Campaign<F> {
 }
 
 /// This holds the current scene of the game
+#[allow(clippy::large_enum_variant)]
 pub enum Scene {
     Intro(Intro),
     Dialogue(Dialogue),
@@ -182,11 +173,21 @@ impl Scene {
         }
     }
 
-    pub fn tick(&mut self) {
+    pub fn tick<R: Rng>(&mut self, rng: &mut R, render: &mut Option<Render>) {
         match self {
             Scene::Intro(_intro) => (),
             Scene::Dialogue(_dialogue) => (),
-            Scene::Battle(_battle) => (),
+            Scene::Battle(battle) => battle.tick(rng, render),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_sort_render() {
+        assert!(Render::Clear > Render::Redraw);
     }
 }

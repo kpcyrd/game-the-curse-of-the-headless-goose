@@ -179,6 +179,6 @@ fn main() -> ! {
             None
         };
 
-        scene.tick();
+        scene.tick(&mut rng, &mut render);
     }
 }
