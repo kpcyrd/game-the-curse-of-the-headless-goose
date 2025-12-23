@@ -10,6 +10,7 @@ pub struct Dialogue {
     pub text: &'static [(Decoration, &'static str)],
     pub progress: usize,
     pub clear_previous_text: bool,
+    init_skip: bool,
 }
 
 impl Dialogue {
@@ -18,6 +19,7 @@ impl Dialogue {
             text,
             progress: 0,
             clear_previous_text: false,
+            init_skip: false,
         }
     }
 
@@ -27,22 +29,37 @@ impl Dialogue {
         campaign: &mut Campaign<F>,
         event: input::Event,
     ) -> Option<Render> {
-        if event == input::Event::Hash {
-            let (current, _) = self.text.get(self.progress).unwrap();
-            self.progress = self.progress.saturating_add(1);
-            if let Some((next, _)) = self.text.get(self.progress) {
-                if next == current {
-                    self.clear_previous_text = true;
-                    Some(Render::Redraw)
-                } else {
-                    Some(Render::Clear)
-                }
-            } else {
+        match event {
+            // Allow skipping dialogue by pressing star twice
+            input::Event::Star if self.init_skip => {
                 campaign.progress_next(rng);
                 Some(Render::Clear)
             }
-        } else {
-            None
+            input::Event::Star => {
+                self.init_skip = true;
+                None
+            }
+            _ if self.init_skip => {
+                self.init_skip = false;
+                None
+            }
+            // Advance dialogue on hash press
+            input::Event::Hash => {
+                let (current, _) = self.text.get(self.progress).unwrap();
+                self.progress = self.progress.saturating_add(1);
+                if let Some((next, _)) = self.text.get(self.progress) {
+                    if next == current {
+                        self.clear_previous_text = true;
+                        Some(Render::Redraw)
+                    } else {
+                        Some(Render::Clear)
+                    }
+                } else {
+                    campaign.progress_next(rng);
+                    Some(Render::Clear)
+                }
+            }
+            _ => None,
         }
     }
 }
