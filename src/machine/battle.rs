@@ -119,8 +119,7 @@ impl Battle {
         }
 
         if let Some(glider) = &mut self.glider {
-            glider.step();
-            if glider.finished() {
+            if !glider.step() {
                 self.glider = None;
             } else {
                 *render = cmp::max(*render, Some(Render::Redraw));
@@ -162,13 +161,15 @@ impl Battle {
             self.turn = None;
         }
 
-        // Check for defeat
-        if self.player.defeated() {
-            // We have been defeated! Game over.
-            self.outcome = Some(Outcome::Lose);
-        } else if self.enemy.defeated() {
-            // They have been defeated! You win!
-            self.outcome = Some(Outcome::Win);
+        if self.glider.is_none() {
+            // Check for defeat
+            if self.player.defeated() {
+                // We have been defeated! Game over.
+                self.outcome = Some(Outcome::Lose);
+            } else if self.enemy.defeated() {
+                // They have been defeated! You win!
+                self.outcome = Some(Outcome::Win);
+            }
         }
 
         *render = cmp::max(*render, Some(Render::Redraw));
