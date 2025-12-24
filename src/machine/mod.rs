@@ -1,10 +1,11 @@
 pub mod battle;
 pub mod dialogue;
+pub mod hq;
 pub mod intro;
 
 use crate::{
     fighter, input,
-    machine::{battle::Battle, dialogue::Dialogue, intro::Intro},
+    machine::{battle::Battle, dialogue::Dialogue, hq::Hq, intro::Intro},
     random::Rng,
     save::Save,
     story,
@@ -117,6 +118,7 @@ impl<F: Flash> Campaign<F> {
                     story::Story::Battle { enemy, reward } => {
                         Scene::Battle(Battle::new(rng, &self.stats, enemy, *reward))
                     }
+                    story::Story::Hq => Scene::Hq(Hq::new()),
                 }
             } else {
                 Scene::Intro(self.intro())
@@ -143,6 +145,16 @@ impl<F: Flash> Campaign<F> {
         self.write_save();
         self.pick_scene(rng);
     }
+
+    pub fn fight_won<R: Rng>(&mut self, rng: &mut R) {
+        // TODO: depending on what has been configured, we may return to the current scene
+        self.progress_next(rng);
+    }
+
+    #[inline(always)]
+    pub const fn money(&self) -> u16 {
+        self.money
+    }
 }
 
 /// This holds the current scene of the game
@@ -151,6 +163,7 @@ pub enum Scene {
     Intro(Intro),
     Dialogue(Dialogue),
     Battle(Battle),
+    Hq(Hq),
 }
 
 impl Scene {
@@ -164,6 +177,7 @@ impl Scene {
             Scene::Intro(intro) => intro.update(rng, campaign, event),
             Scene::Dialogue(dialogue) => dialogue.update(rng, campaign, event),
             Scene::Battle(battle) => battle.update(rng, campaign, event),
+            Scene::Hq(hq) => hq.update(rng, campaign, event),
         };
         if let Some(pending) = campaign.pending_scene.take() {
             *self = pending;
@@ -178,6 +192,7 @@ impl Scene {
             Scene::Intro(_intro) => (),
             Scene::Dialogue(_dialogue) => (),
             Scene::Battle(battle) => battle.tick(rng, render),
+            Scene::Hq(_hq) => (),
         }
     }
 }

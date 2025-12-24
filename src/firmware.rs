@@ -154,6 +154,7 @@ fn main() -> ! {
                 Scene::Battle(battle) => {
                     gfx::battle::render(&mut display, battle);
                 }
+                Scene::Hq(hq) => gfx::hq::render(&mut display, hq, &campaign),
             }
         }
 

@@ -1,6 +1,7 @@
 pub mod battle;
 pub mod dialogue;
 pub mod glide;
+pub mod hq;
 pub mod intro;
 pub mod text;
 

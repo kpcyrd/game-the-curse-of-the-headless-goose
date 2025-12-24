@@ -3,6 +3,7 @@ use crate::fighter;
 pub enum Story {
     Dialogue(&'static [(Decoration, &'static str)]),
     Battle { enemy: fighter::Stats, reward: u16 },
+    Hq,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -124,5 +125,6 @@ pub const SCENES: &[Story] = &[
         },
         reward: 10,
     },
+    Story::Hq,
     Story::Dialogue(&[(Decoration::Chapter, "Epilogue")]),
 ];

@@ -81,7 +81,7 @@ impl Battle {
                     Outcome::Win => {
                         // Progress the campaign
                         campaign.money = campaign.money.saturating_add(self.reward);
-                        campaign.progress_next(rng);
+                        campaign.fight_won(rng);
                     }
                     Outcome::Lose => {
                         // Restart the fight
