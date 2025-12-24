@@ -1,6 +1,6 @@
 use crate::{
     gfx,
-    machine::{Campaign, hq::Hq},
+    machine::{Campaign, home::Home},
 };
 use arrayvec::ArrayString;
 use core::fmt::{self, Write};
@@ -15,7 +15,7 @@ use embedded_savegame::storage::Flash;
 
 pub fn render<D: DrawTarget<Color = Rgb666>, F: Flash>(
     display: &mut D,
-    _hq: &Hq,
+    _home: &Home,
     campaign: &Campaign<F>,
 ) where
     <D as DrawTarget>::Error: fmt::Debug,
@@ -25,7 +25,7 @@ pub fn render<D: DrawTarget<Color = Rgb666>, F: Flash>(
 
     let mut point = Point::new(50, 100);
     Text::with_baseline(
-        "HQ SCENE PLACEHOLDER",
+        "HOME SWEET HOME",
         point,
         gfx::TEXT_STYLE,
         Baseline::Top,

@@ -1,11 +1,11 @@
 pub mod battle;
 pub mod dialogue;
-pub mod hq;
+pub mod home;
 pub mod intro;
 
 use crate::{
     fighter, input,
-    machine::{battle::Battle, dialogue::Dialogue, hq::Hq, intro::Intro},
+    machine::{battle::Battle, dialogue::Dialogue, home::Home, intro::Intro},
     random::Rng,
     save::Save,
     story,
@@ -122,7 +122,7 @@ impl<F: Flash> Campaign<F> {
                         *reward,
                         battle::Resolution::ProgressCampaign,
                     )),
-                    story::Story::Hq => Scene::Hq(Hq::new()),
+                    story::Story::Home => Scene::Home(Home::new()),
                 }
             } else {
                 Scene::Intro(self.intro())
@@ -175,7 +175,7 @@ pub enum Scene {
     Intro(Intro),
     Dialogue(Dialogue),
     Battle(Battle),
-    Hq(Hq),
+    Home(Home),
 }
 
 impl Scene {
@@ -189,7 +189,7 @@ impl Scene {
             Scene::Intro(intro) => intro.update(rng, campaign, event),
             Scene::Dialogue(dialogue) => dialogue.update(rng, campaign, event),
             Scene::Battle(battle) => battle.update(rng, campaign, event),
-            Scene::Hq(hq) => hq.update(rng, campaign, event),
+            Scene::Home(home) => home.update(rng, campaign, event),
         };
         if let Some(pending) = campaign.pending_scene.take() {
             *self = pending;
@@ -204,7 +204,7 @@ impl Scene {
             Scene::Intro(_intro) => (),
             Scene::Dialogue(_dialogue) => (),
             Scene::Battle(battle) => battle.tick(rng, render),
-            Scene::Hq(_hq) => (),
+            Scene::Home(_home) => (),
         }
     }
 }

@@ -3,11 +3,11 @@ use embedded_savegame::storage::Flash;
 use crate::{input, machine::Render, random::Rng};
 
 #[derive(Debug, Default)]
-pub struct Hq {}
+pub struct Home {}
 
-impl Hq {
+impl Home {
     pub const fn new() -> Self {
-        Hq {}
+        Self {}
     }
 
     pub fn update<R: Rng, F: Flash>(
@@ -20,7 +20,7 @@ impl Hq {
             panic!("Fastline into usb mode");
         }
 
-        // HQ update logic goes here
+        // Home menu logic goes here
 
         Some(Render::Redraw)
     }
