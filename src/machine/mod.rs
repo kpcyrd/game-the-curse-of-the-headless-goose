@@ -115,9 +115,13 @@ impl<F: Flash> Campaign<F> {
             if let Some(scene) = story::SCENES.get(self.progress as usize) {
                 match scene {
                     story::Story::Dialogue(text) => Scene::Dialogue(Dialogue::new(text)),
-                    story::Story::Battle { enemy, reward } => {
-                        Scene::Battle(Battle::new(rng, &self.stats, enemy, *reward))
-                    }
+                    story::Story::Battle { enemy, reward } => Scene::Battle(Battle::new(
+                        rng,
+                        &self.stats,
+                        enemy,
+                        *reward,
+                        battle::Resolution::ProgressCampaign,
+                    )),
                     story::Story::Hq => Scene::Hq(Hq::new()),
                 }
             } else {
@@ -146,9 +150,17 @@ impl<F: Flash> Campaign<F> {
         self.pick_scene(rng);
     }
 
-    pub fn fight_won<R: Rng>(&mut self, rng: &mut R) {
-        // TODO: depending on what has been configured, we may return to the current scene
-        self.progress_next(rng);
+    pub fn fight_won<R: Rng>(&mut self, rng: &mut R, battle: &Battle) {
+        // depending on what has been configured, we may return to the current scene or progress
+        match battle.resolution {
+            battle::Resolution::ProgressCampaign => {
+                self.progress_next(rng);
+            }
+            battle::Resolution::Return => {
+                self.write_save();
+                self.pick_scene(rng);
+            }
+        }
     }
 
     #[inline(always)]

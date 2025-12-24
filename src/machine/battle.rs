@@ -28,11 +28,17 @@ impl Outcome {
     }
 }
 
+pub enum Resolution {
+    ProgressCampaign,
+    Return,
+}
+
 pub struct Battle {
     pub player: Fighter,
     pub enemy: Fighter,
     pub their_move: Move,
     pub reward: u16,
+    pub resolution: Resolution,
 
     pub turn: Option<Turn>,
     pub outcome: Option<Outcome>,
@@ -46,6 +52,7 @@ impl Battle {
         player: &fighter::Stats,
         enemy: &fighter::Stats,
         reward: u16,
+        resolution: Resolution,
     ) -> Self {
         let enemy = Fighter::new(enemy);
         let their_move = enemy.random_move(rng);
@@ -55,6 +62,7 @@ impl Battle {
             enemy,
             their_move,
             reward,
+            resolution,
 
             turn: None,
             outcome: None,
@@ -81,7 +89,7 @@ impl Battle {
                     Outcome::Win => {
                         // Progress the campaign
                         campaign.money = campaign.money.saturating_add(self.reward);
-                        campaign.fight_won(rng);
+                        campaign.fight_won(rng, self);
                     }
                     Outcome::Lose => {
                         // Restart the fight
