@@ -101,6 +101,20 @@ pub const SCENES: &[Story] = &[
         health: 10,
         energy: 10,
         recharge: 1,
+        cooldown: 4,
+        abilities: 0b1101,
+    }),
+    Story::Dialogue(&[
+        //
+        (
+            Decoration::Phone,
+            "Excellent! Next is a tougher one, this may take you a few tries.",
+        ),
+    ]),
+    Story::Battle(fighter::Stats {
+        health: 10,
+        energy: 10,
+        recharge: 1,
         cooldown: 2,
         abilities: 0b1101,
     }),

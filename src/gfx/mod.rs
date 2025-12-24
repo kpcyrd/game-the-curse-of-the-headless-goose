@@ -8,10 +8,7 @@ use arrayvec::ArrayString;
 use core::fmt;
 use embedded_graphics::{
     Drawable,
-    mono_font::{
-        MonoFont, MonoTextStyle, MonoTextStyleBuilder,
-        ascii::{FONT_7X13, FONT_9X15_BOLD},
-    },
+    mono_font::{MonoFont, MonoTextStyle, MonoTextStyleBuilder, ascii},
     pixelcolor::Rgb666,
     prelude::{DrawTarget, Point, RgbColor, WebColors},
     primitives::{PrimitiveStyle, PrimitiveStyleBuilder},
@@ -21,7 +18,8 @@ use embedded_graphics::{
 pub const HEIGHT: u32 = 480;
 pub const WIDTH: u32 = 320;
 
-pub const FONT: &MonoFont = &FONT_7X13;
+pub const FONT: &MonoFont = &ascii::FONT_7X13;
+pub const FONT_BOLD: &MonoFont = &ascii::FONT_7X13_BOLD;
 pub const TEXT_STYLE: MonoTextStyle<Rgb666> = MonoTextStyleBuilder::new()
     .font(FONT)
     .text_color(Rgb666::WHITE)
@@ -29,19 +27,19 @@ pub const TEXT_STYLE: MonoTextStyle<Rgb666> = MonoTextStyleBuilder::new()
     .build();
 
 pub const CHAPTER_STYLE: MonoTextStyle<Rgb666> = MonoTextStyleBuilder::new()
-    .font(&FONT_9X15_BOLD)
+    .font(&ascii::FONT_9X15_BOLD)
     .text_color(Rgb666::WHITE)
     .background_color(Rgb666::BLACK)
     .build();
 
 pub const GREEN_TEXT: MonoTextStyle<Rgb666> = MonoTextStyleBuilder::new()
-    .font(FONT)
+    .font(FONT_BOLD)
     .text_color(Rgb666::new(0, 50, 0))
     .background_color(Rgb666::BLACK)
     .build();
 
 pub const RED_TEXT: MonoTextStyle<Rgb666> = MonoTextStyleBuilder::new()
-    .font(FONT)
+    .font(FONT_BOLD)
     .text_color(Rgb666::CSS_RED)
     .background_color(Rgb666::BLACK)
     .build();
