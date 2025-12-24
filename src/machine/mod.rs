@@ -114,8 +114,8 @@ impl<F: Flash> Campaign<F> {
             if let Some(scene) = story::SCENES.get(self.progress as usize) {
                 match scene {
                     story::Story::Dialogue(text) => Scene::Dialogue(Dialogue::new(text)),
-                    story::Story::Battle(enemy) => {
-                        Scene::Battle(Battle::new(rng, &self.stats, enemy))
+                    story::Story::Battle { enemy, reward } => {
+                        Scene::Battle(Battle::new(rng, &self.stats, enemy, *reward))
                     }
                 }
             } else {

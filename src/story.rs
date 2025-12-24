@@ -2,7 +2,7 @@ use crate::fighter;
 
 pub enum Story {
     Dialogue(&'static [(Decoration, &'static str)]),
-    Battle(fighter::Stats),
+    Battle { enemy: fighter::Stats, reward: u16 },
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -97,13 +97,16 @@ pub const SCENES: &[Story] = &[
         (Decoration::Chapter, "Different place, different time"),
         (Decoration::Blank, "Okay, here goes nothing."),
     ]),
-    Story::Battle(fighter::Stats {
-        health: 10,
-        energy: 10,
-        recharge: 1,
-        cooldown: 4,
-        abilities: 0b1101,
-    }),
+    Story::Battle {
+        enemy: fighter::Stats {
+            health: 10,
+            energy: 10,
+            recharge: 1,
+            cooldown: 4,
+            abilities: 0b1101,
+        },
+        reward: 0,
+    },
     Story::Dialogue(&[
         //
         (
@@ -111,12 +114,15 @@ pub const SCENES: &[Story] = &[
             "Excellent! Next is a tougher one, this may take you a few tries.",
         ),
     ]),
-    Story::Battle(fighter::Stats {
-        health: 10,
-        energy: 10,
-        recharge: 1,
-        cooldown: 2,
-        abilities: 0b1101,
-    }),
+    Story::Battle {
+        enemy: fighter::Stats {
+            health: 10,
+            energy: 10,
+            recharge: 1,
+            cooldown: 2,
+            abilities: 0b1101,
+        },
+        reward: 10,
+    },
     Story::Dialogue(&[(Decoration::Chapter, "Epilogue")]),
 ];

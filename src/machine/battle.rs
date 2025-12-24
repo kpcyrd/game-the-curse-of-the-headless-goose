@@ -13,6 +13,7 @@ use embedded_savegame::storage::Flash;
 
 const TURN_STEP_DELAY: u8 = 1;
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum Outcome {
     Win,
     Lose,
@@ -31,6 +32,8 @@ pub struct Battle {
     pub player: Fighter,
     pub enemy: Fighter,
     pub their_move: Move,
+    pub reward: u16,
+
     pub turn: Option<Turn>,
     pub outcome: Option<Outcome>,
     pub glider: Option<Glider>,
@@ -38,7 +41,12 @@ pub struct Battle {
 }
 
 impl Battle {
-    pub fn new<R: Rng>(rng: &mut R, player: &fighter::Stats, enemy: &fighter::Stats) -> Self {
+    pub fn new<R: Rng>(
+        rng: &mut R,
+        player: &fighter::Stats,
+        enemy: &fighter::Stats,
+        reward: u16,
+    ) -> Self {
         let enemy = Fighter::new(enemy);
         let their_move = enemy.random_move(rng);
 
@@ -46,6 +54,8 @@ impl Battle {
             player: Fighter::new(player),
             enemy,
             their_move,
+            reward,
+
             turn: None,
             outcome: None,
             glider: None,
@@ -69,7 +79,8 @@ impl Battle {
             if event == input::Event::Hash {
                 match outcome {
                     Outcome::Win => {
-                        // Do nothing for now
+                        // Progress the campaign
+                        campaign.money = campaign.money.saturating_add(self.reward);
                         campaign.progress_next(rng);
                     }
                     Outcome::Lose => {

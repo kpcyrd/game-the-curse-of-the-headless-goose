@@ -3,9 +3,10 @@ pub mod stats;
 
 use crate::{
     gfx::{self, battle::stats::STATS_WIDTH},
-    machine::battle::Battle,
+    machine::battle::{Battle, Outcome},
 };
-use core::fmt;
+use arrayvec::ArrayString;
+use core::fmt::{self, Write};
 use embedded_graphics::{Drawable, draw_target::DrawTarget, pixelcolor::Rgb666, prelude::Point};
 
 const PLAYER_STATS_POINT: Point = Point::new(10, gfx::HEIGHT as i32 - 65);
@@ -47,6 +48,11 @@ where
 
     // Render battle outcome (if any)
     if let Some(outcome) = &battle.outcome {
-        gfx::render_bold(display, outcome.message());
+        let mut text = ArrayString::<45>::new();
+        text.push_str(outcome.message());
+        if *outcome == Outcome::Win && battle.reward > 0 {
+            write!(text, "\n\n${}", battle.reward).unwrap();
+        }
+        gfx::render_bold(display, &text);
     }
 }
