@@ -1,6 +1,7 @@
 use crate::fighter;
 
 pub enum Story {
+    Moon(&'static [&'static str]),
     Dialogue(&'static [(Decoration, &'static str)]),
     Battle { enemy: fighter::Stats, reward: u16 },
     Home,
@@ -16,16 +17,16 @@ pub enum Decoration {
 }
 
 pub const SCENES: &[Story] = &[
-    Story::Dialogue(&[
+    Story::Moon(&[
         //
-        (Decoration::Blank, "... (Press # to continue)"),
-        (Decoration::Blank, "* POW *"),
-        (Decoration::Blank, "Get up, get up!"),
-        (Decoration::Blank, "..."),
-        (Decoration::Blank, "3.."),
-        (Decoration::Blank, "2.."),
-        (Decoration::Blank, "1.."),
-        (Decoration::Blank, "Knockout!"),
+        "...",
+        "* POW *",
+        "Get up, get up!",
+        "...",
+        "3..",
+        "2..",
+        "1..",
+        "Knockout!",
     ]),
     Story::Dialogue(&[
         //

@@ -2,11 +2,14 @@ pub mod battle;
 pub mod dialogue;
 pub mod home;
 pub mod intro;
+pub mod moon;
 pub mod shop;
 
 use crate::{
     fighter, input,
-    machine::{battle::Battle, dialogue::Dialogue, home::Home, intro::Intro, shop::Shop},
+    machine::{
+        battle::Battle, dialogue::Dialogue, home::Home, intro::Intro, moon::Moon, shop::Shop,
+    },
     random::Rng,
     save::Save,
     story,
@@ -115,6 +118,7 @@ impl<F: Flash> Campaign<F> {
         self.pending_scene = Some(
             if let Some(scene) = story::SCENES.get(self.progress as usize) {
                 match scene {
+                    story::Story::Moon(lines) => Scene::Moon(Moon::new(lines)),
                     story::Story::Dialogue(text) => Scene::Dialogue(Dialogue::new(text)),
                     story::Story::Battle { enemy, reward } => Scene::Battle(Battle::new(
                         rng,
@@ -178,6 +182,7 @@ impl<F: Flash> Campaign<F> {
 #[allow(clippy::large_enum_variant)]
 pub enum Scene {
     Intro(Intro),
+    Moon(Moon),
     Dialogue(Dialogue),
     Battle(Battle),
     Home(Home),
@@ -193,6 +198,7 @@ impl Scene {
     ) -> Option<Render> {
         let render = match self {
             Scene::Intro(intro) => intro.update(rng, campaign, event),
+            Scene::Moon(moon) => moon.update(rng, campaign, event),
             Scene::Dialogue(dialogue) => dialogue.update(rng, campaign, event),
             Scene::Battle(battle) => battle.update(rng, campaign, event),
             Scene::Home(home) => home.update(rng, campaign, event),
@@ -209,6 +215,7 @@ impl Scene {
     pub fn tick<R: Rng>(&mut self, rng: &mut R, render: &mut Option<Render>) {
         match self {
             Scene::Intro(_intro) => (),
+            Scene::Moon(moon) => moon.tick(rng, render),
             Scene::Dialogue(_dialogue) => (),
             Scene::Battle(battle) => battle.tick(rng, render),
             Scene::Home(_home) => (),

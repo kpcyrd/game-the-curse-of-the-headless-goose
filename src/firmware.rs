@@ -150,6 +150,7 @@ fn main() -> ! {
         if render.take() == Some(Render::Redraw) {
             match &mut scene {
                 Scene::Intro(intro) => gfx::intro::render(&mut display, intro),
+                Scene::Moon(moon) => gfx::moon::render(&mut display, moon),
                 Scene::Dialogue(dialogue) => gfx::dialogue::render(&mut display, dialogue),
                 Scene::Battle(battle) => {
                     gfx::battle::render(&mut display, battle);

@@ -3,6 +3,7 @@ pub mod dialogue;
 pub mod glide;
 pub mod home;
 pub mod intro;
+pub mod moon;
 pub mod shop;
 pub mod text;
 
@@ -43,6 +44,12 @@ pub const GREEN_TEXT: MonoTextStyle<Rgb666> = MonoTextStyleBuilder::new()
 pub const RED_TEXT: MonoTextStyle<Rgb666> = MonoTextStyleBuilder::new()
     .font(FONT_BOLD)
     .text_color(Rgb666::CSS_RED)
+    .background_color(Rgb666::BLACK)
+    .build();
+
+pub const HINT_TEXT: MonoTextStyle<Rgb666> = MonoTextStyleBuilder::new()
+    .font(FONT_BOLD)
+    .text_color(Rgb666::CSS_DARK_GRAY)
     .background_color(Rgb666::BLACK)
     .build();
 
