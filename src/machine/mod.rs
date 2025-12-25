@@ -2,10 +2,11 @@ pub mod battle;
 pub mod dialogue;
 pub mod home;
 pub mod intro;
+pub mod shop;
 
 use crate::{
     fighter, input,
-    machine::{battle::Battle, dialogue::Dialogue, home::Home, intro::Intro},
+    machine::{battle::Battle, dialogue::Dialogue, home::Home, intro::Intro, shop::Shop},
     random::Rng,
     save::Save,
     story,
@@ -163,6 +164,10 @@ impl<F: Flash> Campaign<F> {
         }
     }
 
+    pub fn open_shop(&mut self) {
+        self.pending_scene = Some(Scene::Shop(Shop::new()));
+    }
+
     #[inline(always)]
     pub const fn money(&self) -> u16 {
         self.money
@@ -176,6 +181,7 @@ pub enum Scene {
     Dialogue(Dialogue),
     Battle(Battle),
     Home(Home),
+    Shop(Shop),
 }
 
 impl Scene {
@@ -190,6 +196,7 @@ impl Scene {
             Scene::Dialogue(dialogue) => dialogue.update(rng, campaign, event),
             Scene::Battle(battle) => battle.update(rng, campaign, event),
             Scene::Home(home) => home.update(rng, campaign, event),
+            Scene::Shop(shop) => shop.update(rng, campaign, event),
         };
         if let Some(pending) = campaign.pending_scene.take() {
             *self = pending;
@@ -205,6 +212,7 @@ impl Scene {
             Scene::Dialogue(_dialogue) => (),
             Scene::Battle(battle) => battle.tick(rng, render),
             Scene::Home(_home) => (),
+            Scene::Shop(_shop) => (),
         }
     }
 }

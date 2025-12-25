@@ -3,6 +3,7 @@ pub mod dialogue;
 pub mod glide;
 pub mod home;
 pub mod intro;
+pub mod shop;
 pub mod text;
 
 use arrayvec::ArrayString;

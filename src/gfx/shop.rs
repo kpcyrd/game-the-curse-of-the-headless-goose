@@ -1,6 +1,6 @@
 use crate::{
     gfx,
-    machine::{Campaign, home::Home},
+    machine::{Campaign, shop::Shop},
 };
 use arrayvec::ArrayString;
 use core::fmt::{self, Write};
@@ -15,7 +15,7 @@ use embedded_savegame::storage::Flash;
 
 pub fn render<D: DrawTarget<Color = Rgb666>, F: Flash>(
     display: &mut D,
-    _home: &Home,
+    _shop: &Shop,
     campaign: &Campaign<F>,
 ) where
     <D as DrawTarget>::Error: fmt::Debug,
@@ -24,7 +24,7 @@ pub fn render<D: DrawTarget<Color = Rgb666>, F: Flash>(
     write!(&mut buf, "Funds: ${}", campaign.money()).unwrap();
 
     let mut point = Point::new(50, 100);
-    Text::with_baseline("HOME SWEET HOME", point, gfx::TEXT_STYLE, Baseline::Top)
+    Text::with_baseline("SHOP", point, gfx::TEXT_STYLE, Baseline::Top)
         .draw(display)
         .unwrap();
 
@@ -34,7 +34,7 @@ pub fn render<D: DrawTarget<Color = Rgb666>, F: Flash>(
         .unwrap();
 
     point.y += gfx::FONT.character_size.height as i32 * 2;
-    Text::with_baseline("1: Open shop", point, gfx::TEXT_STYLE, Baseline::Top)
+    Text::with_baseline("#: Exit", point, gfx::TEXT_STYLE, Baseline::Top)
         .draw(display)
         .unwrap();
 }

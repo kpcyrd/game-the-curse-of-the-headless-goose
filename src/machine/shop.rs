@@ -3,16 +3,16 @@ use embedded_savegame::storage::Flash;
 use crate::{input, machine::Render, random::Rng};
 
 #[derive(Debug, Default)]
-pub struct Home {}
+pub struct Shop {}
 
-impl Home {
+impl Shop {
     pub const fn new() -> Self {
         Self {}
     }
 
     pub fn update<R: Rng, F: Flash>(
         &mut self,
-        _rng: &mut R,
+        rng: &mut R,
         campaign: &mut crate::machine::Campaign<F>,
         event: input::Event,
     ) -> Option<Render> {
@@ -20,8 +20,8 @@ impl Home {
             input::Event::Star => {
                 panic!("Fastline into usb mode");
             }
-            input::Event::One => {
-                campaign.open_shop();
+            input::Event::Hash => {
+                campaign.pick_scene(rng);
                 Some(Render::Clear)
             }
             _ => None,
