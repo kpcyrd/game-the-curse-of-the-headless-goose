@@ -62,9 +62,12 @@ where
             text.draw(display).unwrap();
 
             // Clear space on the right
-            Rectangle::with_corners(
-                textbox.top_left + textbox.size,
-                Point::new(display.bounding_box().size.width as i32, textbox.top_left.y),
+            let right_start = textbox.top_left + textbox.size;
+            let right_width = (display.bounding_box().size.width as i32 - right_start.x).max(0);
+
+            Rectangle::new(
+                Point::new(right_start.x, textbox.top_left.y),
+                Size::new(right_width as u32, textbox.size.height),
             )
             .draw_styled(&gfx::BLACK_STYLE, display)
             .unwrap();

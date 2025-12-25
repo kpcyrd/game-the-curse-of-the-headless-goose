@@ -74,7 +74,7 @@ impl Moon {
         if !self.animation_done() {
             self.scroll += SCROLL_INCREMENT;
             *render = cmp::max(*render, Some(Render::Redraw));
-        } else if !self.timer.is_due(){
+        } else if !self.timer.is_due() {
             self.timer.tick();
             *render = cmp::max(*render, Some(Render::Redraw));
         }
