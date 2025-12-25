@@ -19,7 +19,7 @@ pub enum Decoration {
 pub const SCENES: &[Story] = &[
     Story::Moon(&[
         //
-        "...",
+        "",
         "* POW *",
         "Get up, get up!",
         "...",

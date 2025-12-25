@@ -5,7 +5,8 @@ use embedded_graphics::{
     draw_target::DrawTarget,
     image::{GetPixel, ImageRaw},
     pixelcolor::{BinaryColor, Rgb666},
-    prelude::{Dimensions, Point, PointsIter, RgbColor},
+    prelude::{Dimensions, Point, PointsIter, RgbColor, Size},
+    primitives::{Rectangle, StyledDrawable},
     text::{Alignment, Text},
 };
 use embedded_graphics_colorcast::Image;
@@ -41,13 +42,31 @@ where
     if moon.animation_done() && moon.timer.is_due() {
         if let Some(line) = moon.line() {
             // Show current line of dialogue
-            Text::with_alignment(
+            let text = Text::with_alignment(
                 line,
                 center + DIALOGUE_OFFSET,
                 gfx::TEXT_STYLE,
                 Alignment::Center,
+            );
+
+            // Clear space on the left
+            let textbox = text.bounding_box();
+            Rectangle::new(
+                Point::new(0, textbox.top_left.y),
+                Size::new(textbox.top_left.x as u32, textbox.size.height as u32),
             )
-            .draw(display)
+            .draw_styled(&gfx::BLACK_STYLE, display)
+            .unwrap();
+
+            // Render the middle text
+            text.draw(display).unwrap();
+
+            // Clear space on the right
+            Rectangle::with_corners(
+                textbox.top_left + textbox.size,
+                Point::new(display.bounding_box().size.width as i32, textbox.top_left.y),
+            )
+            .draw_styled(&gfx::BLACK_STYLE, display)
             .unwrap();
 
             // Teach how to navigate cut-scenes
