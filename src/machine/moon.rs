@@ -61,7 +61,7 @@ impl Moon {
 
                 if self.line().is_none() {
                     campaign.progress_next(rng);
-                    return Some(Render::Clear);
+                    Some(Render::Clear)
                 } else {
                     Some(Render::Redraw)
                 }

@@ -39,48 +39,49 @@ where
         .unwrap();
 
     // Wait until the animation is done, plus some delay
-    if moon.animation_done() && moon.timer.is_due() {
-        if let Some(line) = moon.line() {
-            // Show current line of dialogue
-            let text = Text::with_alignment(
-                line,
-                center + DIALOGUE_OFFSET,
-                gfx::TEXT_STYLE,
-                Alignment::Center,
-            );
+    if moon.animation_done()
+        && moon.timer.is_due()
+        && let Some(line) = moon.line()
+    {
+        // Show current line of dialogue
+        let text = Text::with_alignment(
+            line,
+            center + DIALOGUE_OFFSET,
+            gfx::TEXT_STYLE,
+            Alignment::Center,
+        );
 
-            // Clear space on the left
-            let textbox = text.bounding_box();
-            Rectangle::new(
-                Point::new(0, textbox.top_left.y),
-                Size::new(textbox.top_left.x as u32, textbox.size.height as u32),
-            )
-            .draw_styled(&gfx::BLACK_STYLE, display)
-            .unwrap();
+        // Clear space on the left
+        let textbox = text.bounding_box();
+        Rectangle::new(
+            Point::new(0, textbox.top_left.y),
+            Size::new(textbox.top_left.x as u32, textbox.size.height),
+        )
+        .draw_styled(&gfx::BLACK_STYLE, display)
+        .unwrap();
 
-            // Render the middle text
-            text.draw(display).unwrap();
+        // Render the middle text
+        text.draw(display).unwrap();
 
-            // Clear space on the right
-            let right_start = textbox.top_left + textbox.size;
-            let right_width = (display.bounding_box().size.width as i32 - right_start.x).max(0);
+        // Clear space on the right
+        let right_start = textbox.top_left + textbox.size;
+        let right_width = (display.bounding_box().size.width as i32 - right_start.x).max(0);
 
-            Rectangle::new(
-                Point::new(right_start.x, textbox.top_left.y),
-                Size::new(right_width as u32, textbox.size.height),
-            )
-            .draw_styled(&gfx::BLACK_STYLE, display)
-            .unwrap();
+        Rectangle::new(
+            Point::new(right_start.x, textbox.top_left.y),
+            Size::new(right_width as u32, textbox.size.height),
+        )
+        .draw_styled(&gfx::BLACK_STYLE, display)
+        .unwrap();
 
-            // Teach how to navigate cut-scenes
-            Text::with_alignment(
-                "Press # to continue",
-                center + HELP_HINT_OFFSET,
-                gfx::HINT_TEXT,
-                Alignment::Center,
-            )
-            .draw(display)
-            .unwrap();
-        }
+        // Teach how to navigate cut-scenes
+        Text::with_alignment(
+            "Press # to continue",
+            center + HELP_HINT_OFFSET,
+            gfx::HINT_TEXT,
+            Alignment::Center,
+        )
+        .draw(display)
+        .unwrap();
     }
 }
