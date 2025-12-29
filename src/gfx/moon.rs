@@ -1,11 +1,11 @@
 use crate::{gfx, machine::moon::Moon};
 use core::fmt;
 use embedded_graphics::{
-    Drawable, Pixel,
+    Drawable,
     draw_target::DrawTarget,
-    image::{GetPixel, ImageRaw},
+    image::ImageRaw,
     pixelcolor::{BinaryColor, Rgb666},
-    prelude::{Dimensions, Point, PointsIter, RgbColor, Size},
+    prelude::{Dimensions, Point, RgbColor, Size, Transform},
     primitives::{Rectangle, StyledDrawable},
     text::{Alignment, Text},
 };
@@ -23,20 +23,10 @@ where
 {
     let center = display.bounding_box().center();
 
-    let img = Image::new(&MOON, Point::new(0, 0), Rgb666::WHITE);
+    let img = Image::new(&MOON, Point::new(0, 0), Rgb666::WHITE).with_background(Rgb666::BLACK);
     let point =
         center - img.bounding_box().center() + MOON_DELTA_POINT - Point::new(0, moon.scroll);
-
-    // the colorcast library currently only writes 'on' pixels, but we need both
-    display
-        .draw_iter(img.bounding_box().points().map(|offset| {
-            if MOON.pixel(offset) == Some(BinaryColor::On) {
-                Pixel(point + offset, Rgb666::WHITE)
-            } else {
-                Pixel(point + offset, Rgb666::BLACK)
-            }
-        }))
-        .unwrap();
+    img.translate(point).draw(display).unwrap();
 
     // Wait until the animation is done, plus some delay
     if moon.animation_done()
