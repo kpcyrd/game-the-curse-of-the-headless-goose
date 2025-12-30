@@ -41,6 +41,7 @@ pub struct Campaign<F: Flash> {
     progress: u16,
     money: u16,
     stats: fighter::Stats,
+    purchased: shop::Purchase,
     pending_scene: Option<Scene>,
 }
 
@@ -52,6 +53,7 @@ impl<F: Flash> Campaign<F> {
             progress: 0,
             money: 0,
             stats: fighter::Stats::zero(),
+            purchased: shop::Purchase::empty(),
             pending_scene: None,
         }
     }
@@ -91,6 +93,8 @@ impl<F: Flash> Campaign<F> {
             cooldown: save.pull_u8(DEFAULT_COOLDOWN),
             abilities: save.pull_u16(DEFAULT_ABILITIES),
         };
+
+        self.purchased = shop::Purchase::from(save.pull_u128(0));
 
         /*
         let scene = Scene::Battle(Battle {
@@ -146,6 +150,8 @@ impl<F: Flash> Campaign<F> {
         save.push_u8(self.stats.cooldown);
         save.push_u16(self.stats.abilities);
 
+        save.push_u128(self.purchased.bits());
+
         self.flash.append(save.slice()).unwrap();
     }
 
@@ -170,6 +176,22 @@ impl<F: Flash> Campaign<F> {
 
     pub fn open_shop(&mut self) {
         self.pending_scene = Some(Scene::Shop(Shop::new()));
+    }
+
+    pub fn add_purchase(&mut self, purchase: shop::Purchase) -> bool {
+        if self.purchased.contains(purchase) {
+            return false;
+        }
+
+        let price = purchase.price();
+        let Some(remaining) = self.money.checked_sub(price) else {
+            return false;
+        };
+        self.money = remaining;
+        self.purchased.insert(purchase);
+        self.write_save();
+
+        true
     }
 
     #[inline(always)]
@@ -228,8 +250,34 @@ impl Scene {
 mod tests {
     use super::*;
 
+    type MockFlash = embedded_savegame::mock::MockFlash<512>;
+
     #[test]
     fn test_sort_render() {
         assert!(Render::Clear > Render::Redraw);
+    }
+
+    #[test]
+    fn test_purchase_success() {
+        let flash = MockFlash::new();
+        let mut campaign = Campaign::new(Storage::new(flash));
+        campaign.money = u16::MAX;
+
+        assert!(campaign.add_purchase(shop::Purchase::MOVE_FOUR));
+        assert_eq!(campaign.purchased, shop::Purchase::MOVE_FOUR);
+
+        assert!(campaign.add_purchase(shop::Purchase::MOVE_ONE));
+        assert_eq!(
+            campaign.purchased,
+            shop::Purchase::MOVE_FOUR | shop::Purchase::MOVE_ONE
+        );
+    }
+
+    #[test]
+    fn test_purchase_fail() {
+        let flash = MockFlash::new();
+        let mut campaign = Campaign::new(Storage::new(flash));
+        assert!(!campaign.add_purchase(shop::Purchase::MOVE_ONE));
+        assert_eq!(campaign.purchased, shop::Purchase::empty());
     }
 }

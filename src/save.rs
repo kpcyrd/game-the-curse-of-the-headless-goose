@@ -55,6 +55,14 @@ impl Save {
         }
     }
 
+    pub fn pull_u128(&mut self, default: u128) -> u128 {
+        if let Some(value) = self.take(16) {
+            u128::from_be_bytes(value.try_into().unwrap())
+        } else {
+            default
+        }
+    }
+
     fn push(&mut self, buf: &[u8]) {
         let range = self.cursor..self.cursor + buf.len();
         if let Some(slice) = self.buf.get_mut(range) {
@@ -70,6 +78,10 @@ impl Save {
 
     pub fn push_u8(&mut self, value: u8) {
         self.push(&[value]);
+    }
+
+    pub fn push_u128(&mut self, value: u128) {
+        self.push(&value.to_be_bytes());
     }
 }
 
