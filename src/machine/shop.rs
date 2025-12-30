@@ -47,14 +47,26 @@ impl Purchase {
             _ => "",
         }
     }
+
+    pub fn from_unlock_level(unlocks: u8) -> Self {
+        let mut items = Purchase::empty();
+
+        if unlocks >= 1 {
+            items |= Purchase::MOVE_FOUR;
+        }
+
+        items
+    }
 }
 
-#[derive(Debug, Default)]
-pub struct Shop {}
+#[derive(Debug)]
+pub struct Shop {
+    pub items: Purchase,
+}
 
 impl Shop {
-    pub const fn new() -> Self {
-        Self {}
+    pub const fn new(items: Purchase) -> Self {
+        Self { items }
     }
 
     pub fn update<R: Rng, F: Flash>(

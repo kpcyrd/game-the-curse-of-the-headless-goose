@@ -131,7 +131,7 @@ impl<F: Flash> Campaign<F> {
                         *reward,
                         battle::Resolution::ProgressCampaign,
                     )),
-                    story::Story::Home => Scene::Home(Home::new()),
+                    story::Story::Home { shop_unlocks } => Scene::Home(Home::new(*shop_unlocks)),
                 }
             } else {
                 Scene::Intro(self.intro())
@@ -174,8 +174,8 @@ impl<F: Flash> Campaign<F> {
         }
     }
 
-    pub fn open_shop(&mut self) {
-        self.pending_scene = Some(Scene::Shop(Shop::new()));
+    pub fn open_shop(&mut self, items: shop::Purchase) {
+        self.pending_scene = Some(Scene::Shop(Shop::new(items)));
     }
 
     pub fn add_purchase(&mut self, purchase: shop::Purchase) -> bool {

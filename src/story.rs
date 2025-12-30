@@ -4,7 +4,7 @@ pub enum Story {
     Moon(&'static [&'static str]),
     Dialogue(&'static [(Decoration, &'static str)]),
     Battle { enemy: fighter::Stats, reward: u16 },
-    Home,
+    Home { shop_unlocks: u8 },
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -160,6 +160,6 @@ pub const SCENES: &[Story] = &[
             "Head over to your home to upgrade your stats and buy new abilities. See you in the streets!",
         ),
     ]),
-    Story::Home,
+    Story::Home { shop_unlocks: 1 },
     Story::Dialogue(&[(Decoration::Chapter, "Epilogue")]),
 ];
